@@ -1,4 +1,4 @@
-# Pewiku!
+# Pewiku
 **Whats it?**  
 Implementation of a block-based game inspired by Minecraft.  
 Right now this project corresponds to Minecraft Pocket Edition v0.6.1  
