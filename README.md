@@ -18,5 +18,15 @@ You should take the assets from the original MCPE or use your custom assets.
 
 
 # Building
+You need to go to the `handheld`/`project` folder and select a platform
+
+### Windows
 Building using Visual Studio 2022 is supported.  
-Open the .sln and build.  
+Open the .sln and build, run!  
+### Unix/Debian
+Install all dependencies, see them: **`make deps`**  
+Build & Run: **`make run`**  
+### Android
+android - new solution  
+android_java - old for android 2.2  
+*guide will appear later*  
