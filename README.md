@@ -18,7 +18,7 @@ You should take the assets from the original MCPE or use your custom assets.
 
 
 # Building
-You need to go to the `handheld`/`project` folder and select a platform
+You *can* to go to the `handheld`/`project` folder and select a platform, but it's better to build from project root.
 
 ### Build all
 useful for dev  
