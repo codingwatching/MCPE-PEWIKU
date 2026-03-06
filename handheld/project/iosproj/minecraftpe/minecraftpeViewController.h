@@ -32,6 +32,9 @@
     AppPlatform_iOS* _platform;   
     
     UITouch** _touchMap;
+    bool _xperiaTouchpadActive;
+    float _xperiaTouchpadX;
+    float _xperiaTouchpadY;
     
     BOOL animating;
     NSInteger animationFrameInterval;

@@ -1,10 +1,10 @@
-.PHONY: build-all deps configure build-linux build-server clean
+.PHONY: build-all deps configure build-client build-server run-client run-server clean
 
 BUILD_DIR ?= build
 CMAKE ?= cmake
 JOBS ?= $(shell nproc 2>/dev/null || echo 12)
 
-build-all: build-linux build-server
+build-all: build-client build-server
 
 deps:
 	@echo "Debian/Ubuntu dependencies:"
@@ -13,7 +13,7 @@ deps:
 configure:
 	$(CMAKE) -S . -B $(BUILD_DIR)
 
-build-linux: configure
+build-client: configure
 	@echo "Jobs: " $(JOBS)
 	$(CMAKE) --build $(BUILD_DIR) --target pewiku_linux -j $(JOBS)
 
@@ -21,7 +21,7 @@ build-server: configure
 	@echo "Jobs:" $(JOBS)
 	$(CMAKE) --build $(BUILD_DIR) --target pewiku_server -j $(JOBS)
 
-run-linux: build-linux
+run-client: build-client
 	./$(BUILD_DIR)/handheld/project/linux/pewiku_linux
 
 run-server: build-server

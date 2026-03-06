@@ -13,6 +13,7 @@
 
 #import "../../../src/platform/input/Multitouch.h"
 #import "../../../src/platform/input/Mouse.h"
+#import "../../../src/platform/input/Controller.h"
 #import "../../../src/client/OptionStrings.h"
 
 #import "../../../src/App.h"
@@ -34,9 +35,17 @@
 - (BOOL) releaseView;
 
 - (void) _resetAllPointers;
+- (void) _xperiaTouchpadPress;
+- (void) _xperiaTouchpadMoveByDX:(float)dx dy:(float)dy;
+- (void) _xperiaTouchpadRelease;
 @end
 
 static NSThread* lastThread = nil;
+static float clampToUnit(float value) {
+    if (value < -1.0f) return -1.0f;
+    if (value > 1.0f) return 1.0f;
+    return value;
+}
 
 @implementation minecraftpeViewController
 
@@ -110,6 +119,9 @@ static NSThread* lastThread = nil;
 
     _touchMap = new UITouch*[Multitouch::MAX_POINTERS];
     [self _resetAllPointers];
+    _xperiaTouchpadActive = false;
+    _xperiaTouchpadX = 0.0f;
+    _xperiaTouchpadY = 0.0f;
 
     _dialog = nil;
 }
@@ -300,6 +312,33 @@ static NSThread* lastThread = nil;
         _touchMap[i] = 0;
 }
 
+- (void)_xperiaTouchpadPress {
+    _xperiaTouchpadActive = true;
+    _xperiaTouchpadX = 0.0f;
+    _xperiaTouchpadY = 0.0f;
+    Controller::feed(2, Controller::STATE_TOUCH, _xperiaTouchpadX, _xperiaTouchpadY);
+}
+
+- (void)_xperiaTouchpadMoveByDX:(float)dx dy:(float)dy {
+    if (!_xperiaTouchpadActive) {
+        [self _xperiaTouchpadPress];
+    }
+
+    const float pixelToPad = 0.01f;
+    _xperiaTouchpadX = clampToUnit(_xperiaTouchpadX + dx * pixelToPad);
+    _xperiaTouchpadY = clampToUnit(_xperiaTouchpadY + dy * pixelToPad);
+    Controller::feed(2, Controller::STATE_MOVE, _xperiaTouchpadX, _xperiaTouchpadY);
+}
+
+- (void)_xperiaTouchpadRelease {
+    if (!_xperiaTouchpadActive) return;
+
+    Controller::feed(2, Controller::STATE_RELEASE, _xperiaTouchpadX, _xperiaTouchpadY);
+    _xperiaTouchpadActive = false;
+    _xperiaTouchpadX = 0.0f;
+    _xperiaTouchpadY = 0.0f;
+}
+
 -(int) _startTrackingTouch:(UITouch*) touch {
     for (int i = 0; i < Multitouch::MAX_POINTERS; ++i)
         if (_touchMap[i] == 0) {
@@ -333,6 +372,9 @@ static NSThread* lastThread = nil;
             //LOGI("d: %f, %f\n", touchLocation.x, touchLocation.y);
             Mouse::feed(1, 1, touchLocation.x, touchLocation.y);
             Multitouch::feed(1, 1, touchLocation.x, touchLocation.y, pointerId);
+            if (pointerId == 0) {
+                [self _xperiaTouchpadPress];
+            }
         }
 	}
 }
@@ -352,6 +394,12 @@ static NSThread* lastThread = nil;
             //LOGI("t: %f, %f\n", touchLocation.x, touchLocation.y);
             Mouse::feed(0, 0, touchLocation.x, touchLocation.y);
             Multitouch::feed(0, 0, touchLocation.x, touchLocation.y, pointerId);
+            if (pointerId == 0) {
+                CGPoint previousLocation = [touch previousLocationInView:[self view]];
+                const float dx = (touchLocation.x - previousLocation.x * viewScale);
+                const float dy = (touchLocation.y - previousLocation.y * viewScale);
+                [self _xperiaTouchpadMoveByDX:dx dy:dy];
+            }
         }
 	}	
 }
@@ -367,6 +415,9 @@ static NSThread* lastThread = nil;
             touchLocation.y *= viewScale;
             Mouse::feed(1, 0, touchLocation.x, touchLocation.y);
             Multitouch::feed(1, 0, touchLocation.x, touchLocation.y, pointerId);
+            if (pointerId == 0) {
+                [self _xperiaTouchpadRelease];
+            }
         }
 	}
 }

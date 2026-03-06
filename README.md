@@ -18,22 +18,22 @@ You should take the assets from the original MCPE or use your custom assets.
 
 
 # Building
-You *can* to go to the `handheld`/`project` folder and select a platform, but it's better to build from project root.
+You *can* to go to the `handheld`/`project` folder and select a platform, but it's better to build from the project root.
 
 ### Build all
 useful for dev  
 build linux and server: `make build_all`  
 ### Standalone server
-build: `make build_server`  
-build & run: `make run_server`  
+build: `make build-server`  
+build & run: `make run-server`  
 
 ### Windows
 Building using Visual Studio 2022 is supported.  
 Open the .sln, build, and run!  
 ### Linux (Debian)
 Install all dependencies, see them: **`make deps`**  
-build: `make build_linux`  
-build & run: `make run_linux`  
+build: `make build-client`  
+build & run: `make run-client`  
 ### Android
 android - new solution  
 android_java - old for android 2.2  

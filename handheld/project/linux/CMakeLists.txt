@@ -28,6 +28,7 @@ set(PEWIKU_EXCLUDED_SOURCES
 )
 list(REMOVE_ITEM PEWIKU_SOURCES ${PEWIKU_EXCLUDED_SOURCES})
 
+message(${CMAKE_LIBRARY_ARCHITECTURE})
 add_executable(pewiku_linux ${PEWIKU_SOURCES})
 
 target_include_directories(pewiku_linux PRIVATE
