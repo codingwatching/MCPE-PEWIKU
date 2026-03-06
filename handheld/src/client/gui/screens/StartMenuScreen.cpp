@@ -77,6 +77,10 @@ void StartMenuScreen::init()
 		#endif
 	#endif
 
+	#if defined(DEBUG)
+		version = version + " [DEBUG]";
+	#endif
+
 	bJoin.active = bHost.active = bOptions.active = false;
 }
 

@@ -1,6 +1,7 @@
 .PHONY: build-all deps configure build-client build-server run-client run-server clean
 
-BUILD_DIR ?= build
+DEBUG ?= 0
+BUILD_DIR := build$(if $(filter 1,$(DEBUG)),_debug,)
 CMAKE ?= cmake
 JOBS ?= $(shell nproc 2>/dev/null || echo 12)
 
@@ -11,7 +12,7 @@ deps:
 	@echo "  sudo apt install build-essential cmake libx11-dev libegl1-mesa-dev libgles1-mesa-dev libpng-dev"
 
 configure:
-	$(CMAKE) -S . -B $(BUILD_DIR)
+	$(CMAKE) -S . -B $(BUILD_DIR) -DDEBUG=$(DEBUG)
 
 build-client: configure
 	@echo "Jobs: " $(JOBS)

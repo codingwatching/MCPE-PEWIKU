@@ -7,5 +7,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+if(DEBUG)
+    add_compile_definitions(DEBUG)
+endif()
+
 add_subdirectory(handheld/project/linux)
 add_subdirectory(handheld/project/dedicated_server)

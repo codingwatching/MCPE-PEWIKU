@@ -33,7 +33,7 @@ Open the .sln, build, and run!
 ### Linux (Debian)
 Install all dependencies, see them: **`make deps`**  
 build: `make build-client`  
-build & run: `make run-client`  
+build & run: `make run-client` (optional: add `DEBUG=1` for debug mode)  
 ### Android
 android - new solution  
 android_java - old for android 2.2  

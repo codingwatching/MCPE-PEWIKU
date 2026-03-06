@@ -715,7 +715,7 @@ void Minecraft::tickInput() {
 					#endif
 				}
 			#endif
-			#if defined(RPI)
+			#if defined(RPI) || defined (POSIX)
 				if (key == Keyboard::KEY_E) {
 					screenChooser.setScreen(SCREEN_BLOCKSELECTION);
 				}
@@ -723,7 +723,7 @@ void Minecraft::tickInput() {
 					releaseMouse();
 				}
 			#endif
-			#if defined(WIN32)
+			#if defined(DEBUG)
 				if (key == Keyboard::KEY_F) {
 					options.isFlying = !options.isFlying;
 					player->noPhysics = options.isFlying;
