@@ -835,6 +835,11 @@ void Minecraft::tickInput() {
 					//setIsCreativeMode( !isCreativeMode() );
 				}
 
+				if (key == Keyboard::KEY_K) {
+					for (int i = 0; i < 5 * SharedConstants::TicksPerSecond; ++i)
+						level->tick();
+				}
+
 				if (options.renderDebug) {
 					if (key >= '0' && key <= '9') {
 						_perfRenderer->debugFpsMeterKeyPress(key - '0');
@@ -854,31 +859,9 @@ void Minecraft::tickInput() {
 				}
 			#endif
 		}
-		#ifdef DEBUG
-			if (key == Keyboard::KEY_M) {
-				for (int i = 0; i < 5 * SharedConstants::TicksPerSecond; ++i)
-					level->tick();
-			}
-		#endif
 
 
 		//if (!isPressed) LOGI("Key released: %d\n", key);
-
-		if (!options.useMouseForDigging) {
-			int passedTime = getTimeMs() - lastTickTime;
-			if (passedTime > 200) continue;
-
-			// Destroy and attack is on same button
-			if (key == options.keyDestroy.key && isPressed) {
-				BuildActionIntention bai(BuildActionIntention::BAI_REMOVE | BuildActionIntention::BAI_ATTACK);
-				handleBuildAction(&bai);
-			}
-			else // Build and use/interact is on same button
-			if (key == options.keyUse.key && isPressed) {
-				BuildActionIntention bai(BuildActionIntention::BAI_BUILD | BuildActionIntention::BAI_INTERACT);
-				handleBuildAction(&bai);
-			}
-		}
 	}
 
 	TIMER_POP_PUSH("tickbuild");
@@ -900,8 +883,6 @@ void Minecraft::tickInput() {
 	TIMER_POP_PUSH("handlemouse");
 #if defined(PLATFORM_DESKTOP)
 	handleMouseDown(MouseAction::ACTION_LEFT, isTryingToDestroyBlock);
-	// handleMouseClick(buildHandled && bai.isInteract()
-	// 	|| options.useMouseForDigging && Mouse::isButtonDown(MouseAction::ACTION_RIGHT));
 #else
 	handleMouseDown(MouseAction::ACTION_LEFT, isTryingToDestroyBlock || (buildHandled && bai.isInteract()));
 #endif
