@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-static bool g_hideCursor = false;
+static bool g_hideCursor = true;
 static bool g_running_unix = true;
 static bool g_mouseGrabbed = false;
 static Cursor g_invisibleCursor = None;
@@ -229,16 +229,15 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
         int y = ev.xbutton.y;
 
         if (button == Button4) { // Scroll Up
-            Mouse::feed(3, 0, x, y, 0, 1); 
-        } else if (button == Button5) { // Scroll Down
-            Mouse::feed(3, 0, x, y, 0, -1);
+    		Mouse::feed(3, 0, Mouse::getX(), Mouse::getY(), 0, 1); 
+		} else if (button == Button5) { // Scroll Down
+    		Mouse::feed(3, 0, Mouse::getX(), Mouse::getY(), 0, -1);
         } else {
             int action = 0;
             if (button == Button1) action = 1; // Left
             else if (button == Button3) action = 2; // Right
             
             if (action) {
-                Mouse::feed(0, 0, x, y, 0, 0); 
                 Mouse::feed(action, 1, x, y);
                 Multitouch::feed(action, 1, x, y, 0);
             }
@@ -271,8 +270,8 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
             int dy = y - g_lastY;
 
             if (dx != 0 || dy != 0) {
-                Mouse::feed(0, 0, x, y, dx, dy);
-                Multitouch::feed(0, 0, x, y, 0);
+                Mouse::feed(0, 0, Mouse::getX(), Mouse::getY(), dx, dy);
+                Multitouch::feed(0, 0, Mouse::getX(), Mouse::getY(), 0);
 
                 // center cursor
                 XWindowAttributes wa;
