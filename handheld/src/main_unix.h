@@ -1,6 +1,8 @@
 #ifndef MAIN_UNIX_H__
 #define MAIN_UNIX_H__
 
+// targets generic Linux desktops
+
 #include "client/renderer/gles.h"
 #include "App.h"
 #include "NinecraftApp.h"
@@ -27,11 +29,17 @@
 #include <string>
 #include <vector>
 
+static bool g_hideCursor = false;
 static bool g_running_unix = true;
 static bool g_mouseGrabbed = false;
 static Cursor g_invisibleCursor = None;
+
 static int g_lastX = 0;
 static int g_lastY = 0;
+
+// cursor positions to restore when opening game screens
+static int g_preGrabX = 0;
+static int g_preGrabY = 0;
 
 static Display* g_dpy = nullptr;
 static Window g_win = None;
@@ -74,8 +82,12 @@ static bool loadNetWmIcon(const std::string& path, std::vector<unsigned long>& i
 	iconData.clear(); iconData.reserve(2 + width * height);
 	iconData.push_back((unsigned long)width); iconData.push_back((unsigned long)height);
 	for (png_uint_32 i = 0; i < width * height; ++i) {
-		const uint32_t r = rgba[i * 4 + 0], g = rgba[i * 4 + 1], b = rgba[i * 4 + 2], a = rgba[i * 4 + 3];
-		iconData.push_back((unsigned long)((a << 24) | (r << 16) | (g << 8) | b));
+		const uint32_t r = rgba[i * 4 + 0];
+		const uint32_t g = rgba[i * 4 + 1];
+		const uint32_t b = rgba[i * 4 + 2];
+		const uint32_t a = rgba[i * 4 + 3];
+		const uint32_t argb = (a << 24) | (r << 16) | (g << 8) | b;
+		iconData.push_back((unsigned long)argb);
 	}
 	return true;
 }
@@ -87,6 +99,15 @@ void platform_setMouseGrabbed(bool grab) {
     g_mouseGrabbed = grab;
 
     if (grab) {
+        // save cursor position
+        Window root_ret, child_ret;
+        int root_x, root_y, win_x, win_y;
+        unsigned int mask;
+        if (XQueryPointer(g_dpy, g_win, &root_ret, &child_ret, &root_x, &root_y, &win_x, &win_y, &mask)) {
+            g_preGrabX = win_x;
+            g_preGrabY = win_y;
+        }
+
         if (g_invisibleCursor == None) {
             char data[1] = {0};
             Pixmap blank = XCreateBitmapFromData(g_dpy, g_win, data, 1, 1);
@@ -94,25 +115,36 @@ void platform_setMouseGrabbed(bool grab) {
             g_invisibleCursor = XCreatePixmapCursor(g_dpy, blank, blank, &dummy, &dummy, 0, 0);
             XFreePixmap(g_dpy, blank);
         }
-        XDefineCursor(g_dpy, g_win, g_invisibleCursor);
-        XGrabPointer(g_dpy, g_win, True, 0, GrabModeAsync, GrabModeAsync, g_win, None, CurrentTime);
         
+        if (!g_hideCursor) { // if not hidden yet
+            XDefineCursor(g_dpy, g_win, g_invisibleCursor);
+        }
+
+        XGrabPointer(g_dpy, g_win, True, PointerMotionMask | ButtonPressMask | ButtonReleaseMask, 
+                     GrabModeAsync, GrabModeAsync, g_win, None, CurrentTime);
+        
+        // center
         XWindowAttributes wa;
         XGetWindowAttributes(g_dpy, g_win, &wa);
         g_lastX = wa.width / 2;
         g_lastY = wa.height / 2;
         XWarpPointer(g_dpy, None, g_win, 0, 0, 0, 0, g_lastX, g_lastY);
+        XSync(g_dpy, False);
+        
     } else {
-        XUndefineCursor(g_dpy, g_win);
+        // restore cursor
+        if (!g_hideCursor) {
+            XUndefineCursor(g_dpy, g_win);
+        }
         XUngrabPointer(g_dpy, CurrentTime);
 
-		Window root_return, child_return;
-        int root_x, root_y, win_x, win_y;
-        unsigned int mask_return;
-        if (XQueryPointer(g_dpy, g_win, &root_return, &child_return, &root_x, &root_y, &win_x, &win_y, &mask_return)) {
-            Mouse::feed(0, 0, win_x, win_y, 0, 0);
-            Multitouch::feed(0, 0, win_x, win_y, 0);
-        }
+        XWarpPointer(g_dpy, None, g_win, 0, 0, 0, 0, g_preGrabX, g_preGrabY);
+        g_lastX = g_preGrabX;
+        g_lastY = g_preGrabY;
+        XSync(g_dpy, False);
+
+        Mouse::feed(0, 0, g_preGrabX, g_preGrabY, 0, 0);
+        Multitouch::feed(0, 0, g_preGrabX, g_preGrabY, 0);
     }
 }
 
@@ -128,14 +160,16 @@ static unsigned char transformKey(KeySym keysym) {
         case XK_Return: return 13;
         case XK_BackSpace: return 8;
         case XK_Tab: return 9;
-        case XK_Shift_L:
-        case XK_Shift_R: return 16;
+		case XK_Shift_L:
+        case XK_Shift_R: return Keyboard::KEY_LSHIFT; // вместо "16"
         case XK_Control_L:
-        case XK_Control_R: return 17;
+        case XK_Control_R: return Keyboard::KEY_LCTRL;
         case XK_Up: return 38;
         case XK_Down: return 40;
         case XK_Left: return 37;
         case XK_Right: return 39;
+        case XK_Alt_L:
+        case XK_Alt_R: return 18;
     }
     return 0;
 }
@@ -148,43 +182,63 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
     case ConfigureNotify:
         if (app) app->setSize(ev.xconfigure.width, ev.xconfigure.height);
         break;
-    case KeyPress: {
-        KeySym keysym = XLookupKeysym(&ev.xkey, 0);
-        unsigned char transformed = transformKey(keysym);
-        if (transformed) Keyboard::feed(transformed, 1);
+	case KeyPress: {
+		KeySym keysym = XLookupKeysym(&ev.xkey, 0);
 
-        char buf[8];
+		bool shiftNow = (ev.xkey.state & ShiftMask);
+		bool ctrlNow  = (ev.xkey.state & ControlMask);
+
+		if (shiftNow != Keyboard::isKeyDown(Keyboard::KEY_LSHIFT))
+			Keyboard::feed(Keyboard::KEY_LSHIFT, shiftNow ? KeyboardAction::KEYDOWN : KeyboardAction::KEYUP);
+		if (ctrlNow != Keyboard::isKeyDown(Keyboard::KEY_LCTRL))
+			Keyboard::feed(Keyboard::KEY_LCTRL, ctrlNow ? KeyboardAction::KEYDOWN : KeyboardAction::KEYUP);
+
+		unsigned char transformed = transformKey(keysym);
+		if (transformed) {
+			Keyboard::feed(transformed, KeyboardAction::KEYDOWN);
+		}
+
+		char buf[32];
         int len = XLookupString(&ev.xkey, buf, sizeof(buf), nullptr, nullptr);
         for (int i = 0; i < len; ++i) {
             unsigned char ch = static_cast<unsigned char>(buf[i]);
             if (ch >= 32) Keyboard::feedText(ch);
         }
-        break;
-    }
-    case KeyRelease: {
-        KeySym keysym = XLookupKeysym(&ev.xkey, 0);
-        unsigned char transformed = transformKey(keysym);
-        if (transformed) Keyboard::feed(transformed, 0);
-        break;
-    }
+		break;
+	}
+	case KeyRelease: {
+		KeySym keysym = XLookupKeysym(&ev.xkey, 0);
+
+		bool shiftNow = (ev.xkey.state & ShiftMask);
+		bool ctrlNow  = (ev.xkey.state & ControlMask);
+
+		if (shiftNow != Keyboard::isKeyDown(Keyboard::KEY_LSHIFT))
+			Keyboard::feed(Keyboard::KEY_LSHIFT, shiftNow ? KeyboardAction::KEYDOWN : KeyboardAction::KEYUP);
+		if (ctrlNow != Keyboard::isKeyDown(Keyboard::KEY_LCTRL))
+			Keyboard::feed(Keyboard::KEY_LCTRL, ctrlNow ? KeyboardAction::KEYDOWN : KeyboardAction::KEYUP);
+
+		unsigned char transformed = transformKey(keysym);
+		if (transformed) {
+			Keyboard::feed(transformed, KeyboardAction::KEYUP);
+		}
+		break;
+	}
     case ButtonPress: {
         int button = ev.xbutton.button;
         int x = ev.xbutton.x;
         int y = ev.xbutton.y;
 
-        if (button == Button4) {
-            Mouse::feed(3, 0, x, y, 0, -1); // 3 = ACTION_WHEEL
-        } else if (button == Button5) {
-            Mouse::feed(3, 0, x, y, 0, 1);
+        if (button == Button4) { // Scroll Up
+            Mouse::feed(3, 0, x, y, 0, 1); 
+        } else if (button == Button5) { // Scroll Down
+            Mouse::feed(3, 0, x, y, 0, -1);
         } else {
             int action = 0;
-            if (button == Button1) action = 1;
-            else if (button == Button3) action = 2;
+            if (button == Button1) action = 1; // Left
+            else if (button == Button3) action = 2; // Right
             
             if (action) {
-				// force update cursor position
-                Mouse::feed(0, 0, x, y, 0, 0);
-                
+                Mouse::feed(0, 0, x, y, 0, 0); 
                 Mouse::feed(action, 1, x, y);
                 Multitouch::feed(action, 1, x, y, 0);
             }
@@ -195,6 +249,10 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
         int button = ev.xbutton.button;
         int x = ev.xbutton.x;
         int y = ev.xbutton.y;
+        
+        // ignore scroll wheel release events
+        if (button == Button4 || button == Button5) break;
+
         int action = 0;
         if (button == Button1) action = 1;
         else if (button == Button3) action = 2;
@@ -216,7 +274,7 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
                 Mouse::feed(0, 0, x, y, dx, dy);
                 Multitouch::feed(0, 0, x, y, 0);
 
-                // center cursor back
+                // center cursor
                 XWindowAttributes wa;
                 XGetWindowAttributes(dpy, win, &wa);
                 g_lastX = wa.width / 2;
@@ -224,6 +282,8 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
                 XWarpPointer(dpy, None, win, 0, 0, 0, 0, g_lastX, g_lastY);
             }
         } else {
+            g_lastX = x;
+            g_lastY = y;
             Mouse::feed(0, 0, x, y, 0, 0);
             Multitouch::feed(0, 0, x, y, 0);
         }
@@ -235,6 +295,7 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
 }
 
 int main(int argc, char** argv) {
+	// change working directory to the binary location
 	if (argc > 0 && argv[0]) {
 		std::string path = argv[0];
 		std::size_t pos = path.find_last_of('/');
@@ -245,7 +306,10 @@ int main(int argc, char** argv) {
 	}
 
 	Display* dpy = XOpenDisplay(nullptr);
-	if (!dpy) return 1;
+	if (!dpy) {
+		fprintf(stderr, "Failed to open display\n");
+		return 1;
+	}
 
 	int screen = DefaultScreen(dpy);
 	Window root = RootWindow(dpy, screen);
@@ -262,7 +326,12 @@ int main(int argc, char** argv) {
 	g_win = win;
 
 	XStoreName(dpy, win, "Pewiku");
-	XSelectInput(dpy, win, ExposureMask | StructureNotifyMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | PointerMotionMask);
+	XSelectInput(dpy, win, 
+        ExposureMask | StructureNotifyMask | 
+        KeyPressMask | KeyReleaseMask | 
+        ButtonPressMask | ButtonReleaseMask | 
+        PointerMotionMask | ButtonMotionMask
+    );
 
 	Atom wmDelete = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
 	XSetWMProtocols(dpy, win, &wmDelete, 1);
@@ -275,14 +344,30 @@ int main(int argc, char** argv) {
 		}
 	}
 
+    char data[1] = {0};
+    Pixmap blank = XCreateBitmapFromData(g_dpy, g_win, data, 1, 1);
+    XColor dummy;
+    g_invisibleCursor = XCreatePixmapCursor(g_dpy, blank, blank, &dummy, &dummy, 0, 0);
+    XFreePixmap(g_dpy, blank);
+
+    // hide because rendering game textured cursor
+    if (g_hideCursor) {
+        XDefineCursor(g_dpy, g_win, g_invisibleCursor);
+    }
+
 	XMapWindow(dpy, win);
 	XFlush(dpy);
 
-	// EGL init 
+	// EGL init
 	EGLDisplay eglDisplay = eglGetDisplay((EGLNativeDisplayType)dpy);
-	eglInitialize(eglDisplay, nullptr, nullptr);
+	if (eglDisplay == EGL_NO_DISPLAY) return 1;
+	if (!eglInitialize(eglDisplay, nullptr, nullptr)) return 1;
 
-	static const EGLint eglConfigAttribs[] = { EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 16, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT, EGL_NONE };
+	static const EGLint eglConfigAttribs[] = {
+		EGL_RED_SIZE, 8, EGL_GREEN_SIZE, 8, EGL_BLUE_SIZE, 8, EGL_ALPHA_SIZE, 8, EGL_DEPTH_SIZE, 16,
+		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT, EGL_NONE
+	};
+
 	EGLConfig config = nullptr;
 	EGLint numConfigs = 0;
 	if (!eglChooseConfig(eglDisplay, eglConfigAttribs, &config, 1, &numConfigs) || numConfigs == 0) {
@@ -295,7 +380,8 @@ int main(int argc, char** argv) {
 
 	EGLSurface eglSurface = eglCreateWindowSurface(eglDisplay, config, (EGLNativeWindowType)win, nullptr);
 	EGLContext eglContext = eglCreateContext(eglDisplay, config, EGL_NO_CONTEXT, ctxAttribs);
-	eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
+	if (eglContext == EGL_NO_CONTEXT) return 1;
+	if (!eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext)) return 1;
 	glInit();
 
 	AppContext appContext;
@@ -374,6 +460,8 @@ int main(int argc, char** argv) {
 	delete app;
 	platform->finish();
 	delete platform;
+
+    if (g_invisibleCursor != None) XFreeCursor(dpy, g_invisibleCursor);
 
 	eglMakeCurrent(eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	eglDestroyContext(eglDisplay, eglContext);
