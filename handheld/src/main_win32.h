@@ -108,11 +108,20 @@ LRESULT WINAPI windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 
 	case WM_MOUSEWHEEL: {
 		int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+
+		POINT pt;
+		pt.x = GET_X_LPARAM(lParam);
+		pt.y = GET_Y_LPARAM(lParam);
+		ScreenToClient(hWnd, &pt);
+
+		int x = g_mouseGrabbed ? Mouse::getX() : pt.x;
+		int y = g_mouseGrabbed ? Mouse::getY() : pt.y;
+
 		if (delta > 0) {
-			Mouse::feed(3, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), 0, 1);
+			Mouse::feed(3, 0, x, y, 0, 1);
 		}
 		else if (delta < 0) {
-			Mouse::feed(3, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), 0, -1);
+			Mouse::feed(3, 0, x, y, 0, -1);
 		}
 		return 0;
 	}
