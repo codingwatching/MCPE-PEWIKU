@@ -1141,10 +1141,8 @@ void Minecraft::releaseMouse()
 
 bool Minecraft::useTouchscreen() {
 #ifdef PLATFORM_DESKTOP
-	LOGI("Touch screens!\n");
 	return false;
 #endif
-	LOGI("No touch screens!\n");
 	return options.useTouchScreen || !_supportsNonTouchscreen;
 }
 bool Minecraft::supportNonTouchScreen() {

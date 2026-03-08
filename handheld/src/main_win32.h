@@ -25,6 +25,11 @@
 static App* g_app = 0;
 static volatile bool g_running = true;
 static HWND g_hwnd = NULL;
+static bool g_mouseGrabbed = false;
+static int g_centerX = 0;
+static int g_centerY = 0;
+
+void platform_setMouseGrabbed(bool grab);
 
 static int getBits(int bits, int startBitInclusive, int endBitExclusive, int shiftTruncate) {
 	int sum = 0;
@@ -107,10 +112,45 @@ LRESULT WINAPI windowProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		Mouse::feed( MouseAction::ACTION_RIGHT, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		break;
 	}
+	case WM_ACTIVATE:
+		if (LOWORD(wParam) != WA_INACTIVE && g_mouseGrabbed) {
+			platform_setMouseGrabbed(true);
+		}
+		else if (LOWORD(wParam) == WA_INACTIVE) {
+			ClipCursor(NULL);
+			while (ShowCursor(TRUE) < 0);
+		}
+		return 0;
+
 	case WM_MOUSEMOVE: {
-		Mouse::feed( MouseAction::ACTION_MOVE, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		Multitouch::feed(0, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), 0);
-		break;
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+
+		if (g_mouseGrabbed) {
+			int dx = x - g_centerX;
+			int dy = y - g_centerY;
+
+			RECT rect;
+			GetClientRect(hWnd, &rect);
+			int centerX = (rect.right - rect.left) / 2;
+			int centerY = (rect.bottom - rect.top) / 2;
+
+			if (x != centerX || y != centerY) {
+				Mouse::feed(MouseAction::ACTION_MOVE, 0, x, y, dx, dy);
+				Multitouch::feed(MouseAction::ACTION_MOVE, 0, x, y, 0);
+
+				// center cursor
+				POINT pt = { g_centerX, g_centerY };
+				ClientToScreen(hWnd, &pt);
+				SetCursorPos(pt.x, pt.y);
+			}
+		}
+		else {
+			Mouse::feed(MouseAction::ACTION_MOVE, 0, x, y, 0, 0);
+			Multitouch::feed(MouseAction::ACTION_MOVE, 0, x, y, 0);
+		}
+		Multitouch::feed(0, 0, x, y, 0);
+		return 0;
 	}
 	default:
 		if (uMsg == WM_NCDESTROY) g_running = false;
@@ -214,21 +254,31 @@ void inputNetworkThread(void* userdata)
 
 // calls from MouseHandler
 void platform_setMouseGrabbed(bool grab) {
-    if (!g_hwnd) return;
-    if (grab) {
-        ShowCursor(FALSE);
-        RECT rect;
-        GetClientRect(g_hwnd, &rect);
-        ClientToScreen(g_hwnd, (LPPOINT)&rect.left);
-        ClientToScreen(g_hwnd, (LPPOINT)&rect.right);
+	g_mouseGrabbed = grab;
+	if (!g_hwnd) return;
+	if (grab) {
+		while (ShowCursor(FALSE) >= 0);
+		RECT rect;
+		GetClientRect(g_hwnd, &rect);
+
+		g_centerX = (rect.right - rect.left) / 2;
+        g_centerY = (rect.bottom - rect.top) / 2;
+
+        MapWindowPoints(g_hwnd, NULL, (LPPOINT)&rect, 2);
         ClipCursor(&rect);
-    } else {
-        ShowCursor(TRUE);
-        ClipCursor(NULL);
-    }
+
+        POINT pt = { g_centerX, g_centerY };
+        ClientToScreen(g_hwnd, &pt);
+        SetCursorPos(pt.x, pt.y);
+	}
+	else {
+		while (ShowCursor(TRUE) < 0);
+		ClipCursor(NULL);
+	}
 }
 
 int main(void) {
+	SetProcessDPIAware();
 	AppContext appContext;
 	MSG sMessage;
 
@@ -257,6 +307,7 @@ int main(void) {
 	// Platform init.
 	appContext.platform = new AppPlatform_win32();
 	platform(&hwnd, appContext.platform->getScreenWidth(), appContext.platform->getScreenHeight());
+	g_hwnd = hwnd;
 	ShowWindow(hwnd, SW_SHOW);
 	SetForegroundWindow(hwnd);
 	SetFocus(hwnd);
