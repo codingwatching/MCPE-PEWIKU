@@ -8,10 +8,14 @@ Right now this project corresponds to Minecraft Pocket Edition v0_6_2
 - Saving MCPE experience from gameplay  
 
 **Tasks is right now:**  
-- Controls on PC
+- Options Screen
 - Fix bugs  
-- Add Unix building  
-- Polish Android building  
+- Polish Android building
+
+**Features:**
+- Bulding on linux / windows
+- PC controls
+- It works
 
 
 # Assets
