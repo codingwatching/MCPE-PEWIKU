@@ -25,7 +25,6 @@ Global
 		{19B34E47-B11C-E628-ED97-698E93339EA3}.Debug DEMO|Win32.ActiveCfg = Debug|Win32
 		{19B34E47-B11C-E628-ED97-698E93339EA3}.Debug|Win32.ActiveCfg = Debug|Win32
 		{19B34E47-B11C-E628-ED97-698E93339EA3}.Release|Win32.ActiveCfg = Release|Win32
-		{19B34E47-B11C-E628-ED97-698E93339EA3}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
