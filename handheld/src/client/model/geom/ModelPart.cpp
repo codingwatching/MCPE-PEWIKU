@@ -178,35 +178,23 @@ void ModelPart::translateTo( float scale )
 	}
 }
 
-
-void ModelPart::compile( float scale )
+void ModelPart::compile(float scale)
 {
-#ifndef OPENGL_ES
-	list = glGenLists(1);
-	// FIX NORMAL BUG HERE
-	glNewList(list, GL_COMPILE);
-#endif
 	Tesselator& t = Tesselator::instance;
 	t.begin();
 	t.color(255, 255, 255, 255);
-	for (int i = 0; i < 6; i++) {
-		for (unsigned int i = 0; i < cubes.size(); ++i)
-			cubes[i]->compile(t, scale);
+
+	for (unsigned int j = 0; j < cubes.size(); ++j) {
+		cubes[j]->compile(t, scale);
 	}
+
 	t.end(true, vboId);
-#ifndef OPENGL_ES
-	glEndList();
-#endif
 	compiled = true;
 }
 
 void ModelPart::draw()
 {
-#ifdef OPENGL_ES
 	drawArrayVT_NoState(vboId, cubes.size() * 2 * 3 * 6, 24);
-#else
-	glCallList(list);
-#endif
 }
 
 ModelPart& ModelPart::setTexSize(int xs, int ys) {

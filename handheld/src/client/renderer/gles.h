@@ -5,6 +5,12 @@
 #include "../Options.h"
 
 // Android should always run OPENGL_ES
+#if defined(_WIN32)
+	#ifndef USE_VBO
+		#define USE_VBO
+	#endif
+#endif
+
 #if defined(ANDROID) || defined(__APPLE__) || defined(RPI)
 	#define OPENGL_ES
 #endif
@@ -27,7 +33,6 @@
     #ifdef WIN32
 		#include <WinSock2.h>
 		#include <Windows.h>
-		#define USE_VBO
 	#endif
 	#include <GL/glew.h>
 	#include <GL/gl.h>

@@ -79,23 +79,19 @@ RenderChunk Tesselator::end( bool useMine, int bufferId )
 	const int o_vertices = vertices;
 
 	if (vertices > 0) {
-		if (++vboId >= vboCounts)
-			vboId = 0;
-
-#ifdef USE_VBO
 		// Using VBO, use default buffer id only if we don't send in any
 		if (!useMine) {
+			// Not using VBO - always use the next buffer object
+			if (++vboId >= vboCounts) vboId = 0;
 			bufferId = vboIds[vboId];
 		}
-#else
-		// Not using VBO - always use the next buffer object
-		bufferId = vboIds[vboId];
-#endif
-		int access = GL_STATIC_DRAW;//(accessMode==ACCESS_DYNAMIC) ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW;
+
 		int bytes = p * sizeof(VERTEX);
-		glBindBuffer2(GL_ARRAY_BUFFER, bufferId);
-		glBufferData2(GL_ARRAY_BUFFER, bytes, _varray, access); // GL_STREAM_DRAW
-		totalSize += bytes;
+		glBindBuffer(GL_ARRAY_BUFFER, bufferId);
+		glBufferData(GL_ARRAY_BUFFER, bytes, _varray, GL_STATIC_DRAW);
+
+		// win32
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 #ifndef USE_VBO
 		// 0 1 2 3 4 5 6 7

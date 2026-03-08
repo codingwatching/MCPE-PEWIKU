@@ -76,8 +76,11 @@ LevelRenderer::LevelRenderer( Minecraft* mc)
 	generateSky();
 #else
 	int maxChunksWidth = 1024 / CHUNK_SIZE;
-	numListsOrBuffers = maxChunksWidth * maxChunksWidth * maxChunksWidth * 3;
-	chunkLists = glGenLists(numListsOrBuffers);
+	numListsOrBuffers = maxChunksWidth * maxChunksWidth * (128 / CHUNK_SIZE) * 3;
+	chunkBuffers = new GLuint[numListsOrBuffers];
+	glGenBuffers(numListsOrBuffers, chunkBuffers);
+	glGenBuffers(1, &skyBuffer);
+	generateSky();
 #endif
 }
 
@@ -88,12 +91,20 @@ LevelRenderer::~LevelRenderer()
 
 	deleteChunks();
 
-#ifdef OPENGL_ES
-	glDeleteBuffers(numListsOrBuffers, chunkBuffers);
-	glDeleteBuffers(1, &skyBuffer);
-	delete[] chunkBuffers;
-#else
-	glDeleteLists(numListsOrBuffers, chunkLists);
+	if (chunkBuffers != nullptr) {
+		glDeleteBuffers(numListsOrBuffers, chunkBuffers);
+		delete[] chunkBuffers;
+		chunkBuffers = nullptr;
+	}
+
+	if (skyBuffer != 0) {
+		glDeleteBuffers(1, &skyBuffer);
+	}
+
+#ifndef USE_VBO
+	if (chunkLists != 0) {
+		glDeleteLists(numListsOrBuffers, chunkLists);
+	}
 #endif
 }
 
@@ -1012,10 +1023,9 @@ void LevelRenderer::renderSky(float alpha) {
     glEnable2(GL_FOG);
     glColor4f2(sr, sg, sb, 1.0f);
 
-#ifdef OPENGL_ES
 	drawArrayVT(skyBuffer, skyVertexCount);
-#endif
-    glEnable2(GL_TEXTURE_2D);
+
+	glEnable2(GL_TEXTURE_2D);
 }
 
 void LevelRenderer::renderClouds( float alpha ) {

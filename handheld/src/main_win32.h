@@ -4,6 +4,7 @@
 #include <process.h>
 #include <cstdio>
 #include <cstring>
+#include <GL/glew.h>
 #include "platform/input/Mouse.h"
 #include "platform/input/Multitouch.h"
 #include "util/Mth.h"
@@ -244,19 +245,6 @@ int main(void) {
 
 #ifndef STANDALONE_SERVER
 
-	EGLint aEGLAttributes[] = {
-		EGL_RED_SIZE,		8,
-		EGL_GREEN_SIZE,		8,
-		EGL_BLUE_SIZE,		8,
-		EGL_ALPHA_SIZE,		8,
-		EGL_DEPTH_SIZE,		16,
-		EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT,
-		EGL_NONE
-	};
-
-	EGLConfig m_eglConfig[1];
-	EGLint nConfigs;
-
 	HWND hwnd;
 	g_running = true;
 
@@ -278,15 +266,22 @@ int main(void) {
 		printf("Failed to register raw input: %d\n", GetLastError());
 	}
 
-	appContext.display = eglGetDisplay(GetDC(hwnd));
-	eglInitialize(appContext.display, NULL, NULL);
-	eglChooseConfig(appContext.display, aEGLAttributes, m_eglConfig, 1, &nConfigs);
-	appContext.surface = eglCreateWindowSurface(appContext.display, m_eglConfig[0], (NativeWindowType)hwnd, 0);
-	appContext.context = eglCreateContext(appContext.display, m_eglConfig[0], EGL_NO_CONTEXT, NULL);
-	if (!appContext.context) {
-		printf("EGL error: %d\n", eglGetError());
+	HDC hdc = GetDC(hwnd);
+	PIXELFORMATDESCRIPTOR pfd = {
+		sizeof(PIXELFORMATDESCRIPTOR), 1,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+		PFD_TYPE_RGBA, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		24, 8, 0, PFD_MAIN_PLANE, 0, 0, 0, 0
+	};
+	int pf = ChoosePixelFormat(hdc, &pfd);
+	SetPixelFormat(hdc, pf, &pfd);
+	HGLRC hglrc = wglCreateContext(hdc);
+	wglMakeCurrent(hdc, hglrc);
+
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK) {
+		printf("Failed to initialize GLEW\n");
 	}
-	eglMakeCurrent(appContext.display, appContext.surface, appContext.surface, appContext.context);
 
 	glInit();
 
@@ -312,6 +307,7 @@ int main(void) {
 
 		processMouseInput();
 		app->update();
+		SwapBuffers(hdc);
 	}
 
 	delete app;
@@ -319,10 +315,9 @@ int main(void) {
 	delete appContext.platform;
 
 #ifndef STANDALONE_SERVER
-	eglMakeCurrent(appContext.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-	eglDestroyContext(appContext.display, appContext.context);
-	eglDestroySurface(appContext.display, appContext.surface);
-	eglTerminate(appContext.display);
+	wglMakeCurrent(NULL, NULL);
+	wglDeleteContext(hglrc);
+	ReleaseDC(hwnd, hdc);
 #endif
 
 	return 0;
