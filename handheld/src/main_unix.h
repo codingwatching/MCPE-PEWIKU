@@ -43,6 +43,8 @@ static int g_preGrabY = 0;
 
 static Display* g_dpy = nullptr;
 static Window g_win = None;
+static int g_winWidth = 848;
+static int g_winHeight = 480;
 
 static bool loadNetWmIcon(const std::string& path, std::vector<unsigned long>& iconData) {
 	std::ifstream source(path.c_str(), std::ios::binary);
@@ -124,10 +126,8 @@ void platform_setMouseGrabbed(bool grab) {
                      GrabModeAsync, GrabModeAsync, g_win, None, CurrentTime);
         
         // center
-        XWindowAttributes wa;
-        XGetWindowAttributes(g_dpy, g_win, &wa);
-        g_lastX = wa.width / 2;
-        g_lastY = wa.height / 2;
+        g_lastX = g_winWidth / 2;
+        g_lastY = g_winHeight / 2;
         XWarpPointer(g_dpy, None, g_win, 0, 0, 0, 0, g_lastX, g_lastY);
         
     } else {
@@ -147,7 +147,7 @@ void platform_setMouseGrabbed(bool grab) {
 
 	XSync(g_dpy, False);
     XEvent dummy;
-    while (XCheckMaskEvent(g_dpy, PointerMotionMask, &dummy)) {
+    while (XCheckTypedWindowEvent(g_dpy, g_win, MotionNotify, &dummy)) {
         // skip
     }
 }
@@ -184,7 +184,9 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
         g_running_unix = false;
         break;
     case ConfigureNotify:
-        if (app) app->setSize(ev.xconfigure.width, ev.xconfigure.height);
+        g_winWidth = ev.xconfigure.width;
+        g_winHeight = ev.xconfigure.height;
+        if (app) app->setSize(g_winWidth, g_winHeight);
         break;
 	case KeyPress: {
 		KeySym keysym = XLookupKeysym(&ev.xkey, 0);
@@ -278,10 +280,8 @@ static void handleXEvent(Display* dpy, Window win, XEvent& ev, App* app) {
                 Multitouch::feed(0, 0, Mouse::getX(), Mouse::getY(), 0);
 
                 // center cursor
-                XWindowAttributes wa;
-                XGetWindowAttributes(dpy, win, &wa);
-                g_lastX = wa.width / 2;
-                g_lastY = wa.height / 2;
+                g_lastX = g_winWidth / 2;
+                g_lastY = g_winHeight / 2;
                 XWarpPointer(dpy, None, win, 0, 0, 0, 0, g_lastX, g_lastY);
             }
         } else {
