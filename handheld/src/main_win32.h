@@ -119,7 +119,7 @@ LRESULT WINAPI windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 		}
 		else if (LOWORD(wParam) == WA_INACTIVE) {
 			ClipCursor(NULL);
-			while (ShowCursor(TRUE) < 0);
+			// while (ShowCursor(TRUE) < 0);
 		}
 		return 0;
 
@@ -268,7 +268,7 @@ void platform_setMouseGrabbed(bool grab) {
 	g_mouseGrabbed = grab;
 	if (!g_hwnd) return;
 	if (grab) {
-		while (ShowCursor(FALSE) >= 0);
+		// while (ShowCursor(FALSE) >= 0);
 		RECT rect;
 		GetClientRect(g_hwnd, &rect);
 
@@ -284,7 +284,7 @@ void platform_setMouseGrabbed(bool grab) {
 		g_skipMouseMove = true;
 	}
 	else {
-		while (ShowCursor(TRUE) < 0);
+		// while (ShowCursor(TRUE) < 0);
 		ClipCursor(NULL);
 	}
 }
@@ -323,6 +323,9 @@ int main(void) {
 	ShowWindow(hwnd, SW_SHOW);
 	SetForegroundWindow(hwnd);
 	SetFocus(hwnd);
+
+	// hide cursor (show game textured cursor instead)
+	while (ShowCursor(FALSE) >= 0);
 
 	// EGL init.
 	appContext.display = eglGetDisplay(GetDC(hwnd));
