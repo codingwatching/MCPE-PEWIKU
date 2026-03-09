@@ -16,7 +16,7 @@ Discord: [https://discord.gg/e5pHK5u2UD](https://discord.gg/e5pHK5u2UD)
 - Polish Android building  
 
 **Recent updates:**
-- Bulding on linux / windows  
+- Play on linux / windows  
 - PC controls  
 
 **Features:**  
