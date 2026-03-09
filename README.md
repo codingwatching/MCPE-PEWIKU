@@ -3,18 +3,23 @@
 Implementation of a block-based game inspired by Minecraft.  
 Right now this project corresponds to Minecraft Pocket Edition v0.6.2  
 
+Discord: [https://discord.gg/e5pHK5u2UD](https://discord.gg/e5pHK5u2UD)  
+
 **Goals:**  
 - Full compliance with MCPE 0.7 & 0.8  
-- Saving MCPE experience from gameplay  
+- Saving MCPE experience from gameplay
+Release updates according to the MCPE versions. Version 0.8 is not a goal, but an intermediate stage. The target is version 1.0-1.2
 
 **Tasks is right now:**  
 - Options Screen  
 - Fix bugs  
 - Polish Android building  
 
+**Recent updates:**
+- Bulding on linux / windows  
+- PC controls  
+
 **Features:**  
-- Bulding on linux / windows (new)  
-- PC controls (new)  
 - Basic blocks  
 - World generation like MC beta  
 - Crafting system  
