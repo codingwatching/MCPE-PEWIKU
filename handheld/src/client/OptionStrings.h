@@ -3,11 +3,16 @@
 
 class OptionStrings {
 public:
+    static const char* Audio_Music;
+    static const char* Audio_Sound;
+
     static const char* Multiplayer_Username;
     static const char* Multiplayer_ServerVisible;
     
     static const char* Graphics_Fancy;
     static const char* Graphics_LowQuality;
+    static const char* Graphics_Fov;
+    static const char* Graphics_GuiScale;
     
     static const char* Controls_Sensitivity;
     static const char* Controls_InvertMouse;
@@ -17,6 +22,7 @@ public:
     static const char* Controls_FeedbackVibration;
 
 	static const char* Game_DifficultyLevel;
+    static const char* Game_ThirdPerson;
 };
 
 #endif /*NET_MINECRAFT_CLIENT__OptionsStrings_H__*/

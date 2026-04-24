@@ -695,6 +695,31 @@ void ScrollingPane::setSelected( int id, bool selected )
 	}
 }
 
+void ScrollingPane::scrollBy(float dx, float dy)
+{
+	adjustContentSize();
+	minPoint.set((float)(size.w - adjustedContentSize.w), (float)(size.h - adjustedContentSize.h), 0);
+	stopDecelerationAnimation();
+
+	Vec3 next = _contentOffset + Vec3(dx, dy, 0);
+	if (isNotSet(SF_LockX))
+		next.x = Mth::clamp(next.x, minPoint.x, 0.0f);
+	else
+		next.x = _contentOffset.x;
+
+	if (isNotSet(SF_LockY))
+		next.y = Mth::clamp(next.y, minPoint.y, 0.0f);
+	else
+		next.y = _contentOffset.y;
+
+	setContentOffset(next.x, next.y);
+
+	if (isSet(SF_ShowScrollbar)) {
+		if (isNotSet(SF_LockX)) hScroll.fading = 1;
+		if (isNotSet(SF_LockY)) vScroll.fading = 1;
+	}
+}
+
 void ScrollingPane::translate( float xo, float yo )
 {
 	bbox.x += (int)xo;

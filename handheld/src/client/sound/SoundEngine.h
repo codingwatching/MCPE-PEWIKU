@@ -7,11 +7,15 @@
 	#include "../../platform/audio/SoundSystemSL.h"
 #elif defined(__APPLE__)
     #include "../../platform/audio/SoundSystemAL.h"
+#elif defined(_WIN32)
+	#include "../../platform/audio/SoundSystemWin32.h"
 #else
 	#include "../../platform/audio/SoundSystem.h"
 #endif
 #include "SoundRepository.h"
 #include "../../util/Random.h"
+#include <vector>
+#include <string>
 
 class Minecraft;
 class Mob;
@@ -25,6 +29,8 @@ class SoundEngine
 		SoundSystemSL soundSystem;
     #elif defined(__APPLE__)
         SoundSystemAL soundSystem;
+	#elif defined(_WIN32)
+		SoundSystemWin32 soundSystem;
 	#else
 	    SoundSystem soundSystem;
 	#endif
@@ -60,9 +66,24 @@ public:
 private:
 	void loadLibrary() {}
     SoundDesc _pp(const std::string& fn);
+
+#ifdef _WIN32
+	void discoverMusicTracks();
+	void refreshMusicPlayback();
+	void stopMusicPlayback();
+	void playNextMusicTrack();
+#endif
     
 	SoundRepository sounds;
 	Minecraft* mc;
+
+#ifdef _WIN32
+	std::vector<std::string> _musicTracks;
+	std::vector<int> _musicOrder;
+	int _musicOrderIndex;
+	bool _musicWasEnabled;
+	bool _musicHasOpenTrack;
+#endif
 };
 
-#endif /*NET_MINECRAFT_CLIENT_SOUND__SoundEngine_H__*/
+#endif /* NET_MINECRAFT_CLIENT_SOUND__SoundEngine_H__ */

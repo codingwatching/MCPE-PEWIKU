@@ -427,6 +427,15 @@ void PaneCraftingScreen::keyPressed( int eventKey )
 	}
 }
 
+void PaneCraftingScreen::mouseScrolled(int x, int y, int scrollDelta)
+{
+	if (!pane || scrollDelta == 0)
+		return;
+
+	const float step = 18.0f;
+	pane->scrollBy(0.0f, step * (float)scrollDelta);
+}
+
 void PaneCraftingScreen::craftSelectedItem()
 {
 	if (!currentItem)

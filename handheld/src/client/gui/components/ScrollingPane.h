@@ -54,6 +54,7 @@ public:
 	bool getGridItemFor_slow(int itemIndex, GridItem& out);
 
 	void setSelected(int id, bool selected);
+	void scrollBy(float dx, float dy);
 
 	// This function is called with all visible GridItems. The base
 	// implementation just dispatches each item to renderItem in y,x order

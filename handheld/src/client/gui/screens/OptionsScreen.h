@@ -15,7 +15,7 @@ class OptionsScreen: public Screen
 	void generateOptionScreens();
 
 public:
-	OptionsScreen();
+	OptionsScreen(int initialCategory = 0);
 	~OptionsScreen();
 	void setupPositions();
 	void buttonClicked( Button* button );
@@ -29,10 +29,14 @@ public:
 private:
 	Touch::THeader* bHeader;
 	ImageButton* btnClose;
+#if defined(WIN32)
+	Button* btnUsername;
+#endif
 	std::vector<Touch::TButton*> categoryButtons;
 	std::vector<OptionsPane*> optionPanes;
 	OptionsPane* currentOptionPane;
 	int selectedCategory;
+	int initialCategory;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS__OptionsScreen_H__*/

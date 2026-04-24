@@ -56,6 +56,7 @@ public:
 	virtual int getScreenHeight();
     virtual float getPixelsPerMillimeter();
     
+	virtual bool supportsTouchscreen();
 	virtual bool isTouchscreen();
     virtual void vibrate(int milliSeconds);
     

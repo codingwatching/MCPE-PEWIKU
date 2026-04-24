@@ -356,9 +356,12 @@ void GameRenderer::renderLevel(float a) {
 			if (mc->hitResult.isHit() && !cameraEntity->isUnderLiquid(Material::water)) {
 				TIMER_POP_PUSH("select");
 				Player* player = (Player*) cameraEntity;
+                // show block outline
 				if (mc->useTouchscreen()) {
 					levelRenderer->renderHitSelect(player, mc->hitResult, 0, NULL, a); //player.inventory->getSelected(), a);
-				}
+				} else {
+                    levelRenderer->renderHitOutlineBold(player, mc->hitResult, 0, NULL, a);
+                }
 				levelRenderer->renderHit(player, mc->hitResult, 0, NULL, a);//player->inventory.getSelected(), a);
 			}
 		}
@@ -397,12 +400,15 @@ void GameRenderer::tickFov() {
 /*private*/
 float GameRenderer::getFov(float a, bool applyEffects) {
     Mob* player = mc->cameraTargetPlayer;
-    float fov = 70;
+    float fov = (float)mc->options.fov;
 
 	if (applyEffects)
 		fov *= this->oFov + (this->fov - this->oFov) * a;
 
-    if (player->isUnderLiquid(Material::water)) fov = 60;
+    if (player->isUnderLiquid(Material::water)) {
+        // original 60/70 ratio
+		fov *= (60.0f / 70.0f);
+    }
     if (player->health <= 0) {
         float duration = player->deathTime + a;
 
@@ -881,7 +887,8 @@ void GameRenderer::renderItemInHand(float a, int eye) {
 
     if (!mc->options.thirdPersonView && (mc->cameraTargetPlayer->isPlayer() && !((Player*)mc->cameraTargetPlayer)->isSleeping())) {
         if (!mc->options.hideGui) {
-			float fov = getFov(a, false);
+            const float fov = 70.0f;
+			// float fov = getFov(a, false);
 			if (fov != _setupCameraFov) {
 				glMatrixMode(GL_PROJECTION);
 				glLoadIdentity();

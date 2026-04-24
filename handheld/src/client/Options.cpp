@@ -35,7 +35,8 @@ void Options::initDefaultValues() {
 	anaglyph3d = false;
 	limitFramerate = false;
 	fancyGraphics = true;//false;
-	ambientOcclusion = false;
+	ambientOcclusion = true;
+	fov = 70;
 	if(minecraft->supportNonTouchScreen())
 		useTouchScreen = false;
 	else
@@ -143,7 +144,8 @@ const Options::Option
 	Options::Option::USE_TOUCHSCREEN	 (16, "options.usetouchscreen", false, true),
 	Options::Option::USE_TOUCH_JOYPAD	 (17, "options.usetouchpad", false, true),
 	Options::Option::DESTROY_VIBRATION   (18, "options.destroyvibration", false, true),
-	Options::Option::PIXELS_PER_MILLIMETER(19, "options.pixelspermilimeter", true, false);
+	Options::Option::PIXELS_PER_MILLIMETER(19, "options.pixelspermilimeter", true, false),
+	Options::Option::FOV				 (20, "options.fov", true, false);
 
 /* private */
 const float Options::SOUND_MIN_VALUE = 0.0f;
@@ -154,6 +156,8 @@ const float Options::SENSITIVITY_MIN_VALUE = 0.0f;
 const float Options::SENSITIVITY_MAX_VALUE = 1.0f;
 const float Options::PIXELS_PER_MILLIMETER_MIN_VALUE = 3.0f;
 const float Options::PIXELS_PER_MILLIMETER_MAX_VALUE = 4.0f;
+const float Options::FOV_MIN_VALUE = 30.0f;
+const float Options::FOV_MAX_VALUE = 110.0f;
 const int DIFFICULY_LEVELS[] = {
 	Difficulty::PEACEFUL,
 	Difficulty::NORMAL
@@ -187,11 +191,26 @@ void Options::update()
 {
 	viewDistance = 2;
 	StringVector optionStrings = optionsFile.getOptionStrings();
+	if (optionStrings.empty()) {
+		// First run or empty file: materialize current defaults to options.txt.
+		save();
+		return;
+	}
 	for (unsigned int i = 0; i < optionStrings.size(); i += 2) {
 		const std::string& key = optionStrings[i];
 		const std::string& value = optionStrings[i+1];
 
         //LOGI("reading key: %s (%s)\n", key.c_str(), value.c_str());
+
+		// Audio
+		if (key == OptionStrings::Audio_Music) {
+			float volume;
+			if (readFloat(value, volume)) music = volume;
+		}
+		if (key == OptionStrings::Audio_Sound) {
+			float volume;
+			if (readFloat(value, volume)) sound = volume;
+		}
         
 		// Multiplayer
 		if (key == OptionStrings::Multiplayer_Username) username = value;
@@ -212,6 +231,9 @@ void Options::update()
 		if (key == OptionStrings::Controls_IsLefthanded) {
 			readBool(value, isLeftHanded);
 		}
+		if (key == OptionStrings::Controls_UseTouchScreen) {
+			readBool(value, useTouchScreen);
+		}
 		if (key == OptionStrings::Controls_UseTouchJoypad) {
 			readBool(value, isJoyTouchArea);
 			if (!minecraft->useTouchscreen())
@@ -223,6 +245,25 @@ void Options::update()
 			readBool(value, destroyVibration);
 
 		// Graphics
+		if (key == OptionStrings::Graphics_Fov) {
+			int fovValue;
+			if (readInt(value, fovValue)) {
+				if (fovValue < 30) fovValue = 30;
+				if (fovValue > 110) fovValue = 110;
+				fov = fovValue;
+			}
+		}
+		if (key == OptionStrings::Graphics_GuiScale) {
+			int guiScaleValue;
+			if (readInt(value, guiScaleValue)) {
+				if (guiScaleValue <= 0) guiScaleValue = 0;
+				else if (guiScaleValue <= 1) guiScaleValue = 1;
+				else if (guiScaleValue <= 2) guiScaleValue = 2;
+				else if (guiScaleValue <= 4) guiScaleValue = 4;
+				else guiScaleValue = 8;
+				guiScale = guiScaleValue;
+			}
+		}
 		if (key == OptionStrings::Graphics_Fancy) {
 			readBool(value, fancyGraphics);
 		}
@@ -240,6 +281,9 @@ void Options::update()
 			// Only support peaceful and normal right now
 			if (difficulty != Difficulty::PEACEFUL && difficulty != Difficulty::NORMAL)
 				difficulty = Difficulty::NORMAL;
+		}
+		if (key == OptionStrings::Game_ThirdPerson) {
+			readBool(value, thirdPersonView);
 		}
 	}
     
@@ -293,9 +337,20 @@ void Options::load()
 void Options::save()
 {
 	StringVector stringVec;
+	// Audio
+	addOptionToSaveOutput(stringVec, OptionStrings::Audio_Music, music);
+	addOptionToSaveOutput(stringVec, OptionStrings::Audio_Sound, sound);
+
 	// Game
+	addOptionToSaveOutput(stringVec, OptionStrings::Multiplayer_Username, username);
 	addOptionToSaveOutput(stringVec, OptionStrings::Multiplayer_ServerVisible, serverVisible);
 	addOptionToSaveOutput(stringVec, OptionStrings::Game_DifficultyLevel, difficulty);
+	addOptionToSaveOutput(stringVec, OptionStrings::Game_ThirdPerson, thirdPersonView);
+
+	// Graphics
+	addOptionToSaveOutput(stringVec, OptionStrings::Graphics_Fancy, fancyGraphics);
+	addOptionToSaveOutput(stringVec, OptionStrings::Graphics_Fov, fov);
+	addOptionToSaveOutput(stringVec, OptionStrings::Graphics_GuiScale, guiScale);
 
 	// Input
 	addOptionToSaveOutput(stringVec, OptionStrings::Controls_InvertMouse, invertYMouse);
@@ -347,6 +402,7 @@ void Options::save()
 	//    System.out.println("Failed to save options");
 	//    e.printStackTrace();
 	//}
+	optionsFile.save(stringVec);
 }
 void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, bool boolValue) {
 	std::stringstream ss;
@@ -361,6 +417,11 @@ void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name
 void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, int intValue) {
 	std::stringstream ss;
 	ss << name << ":" << intValue;
+	stringVector.push_back(ss.str());
+}
+void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, const std::string& stringValue) {
+	std::stringstream ss;
+	ss << name << ":" << stringValue;
 	stringVector.push_back(ss.str());
 }
 

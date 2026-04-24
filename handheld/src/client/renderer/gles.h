@@ -29,6 +29,11 @@
         #endif
     #endif
 #else
+	// It probably works... check
+	#if defined(WIN32)
+		#define USE_VBO
+	#endif
+
     // Uglyness to fix redeclaration issues
     #ifdef WIN32
 		#include <WinSock2.h>

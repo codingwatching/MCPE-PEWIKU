@@ -5,12 +5,19 @@
 #include "../../Minecraft.h"
 #include "../../../world/level/LevelSettings.h"
 #include "../../../platform/time.h"
+#include "../../../util/StringUtils.h"
+#include <cstdio>
 
-SimpleChooseLevelScreen::SimpleChooseLevelScreen(const std::string& levelName)
+static char ILLEGAL_FILE_CHARACTERS[] = {
+	'/', '\n', '\r', '\t', '\0', '\f', '`', '?', '*', '\\', '<', '>', '|', '\"', ':'
+};
+
+SimpleChooseLevelScreen::SimpleChooseLevelScreen(const std::string& levelName, const std::string& seedText)
 :	bCreative(0),
 	bSurvival(0),
 	bBack(0),
 	levelName(levelName),
+	seedText(seedText),
 	hasChosen(false)
 {
 }
@@ -82,9 +89,31 @@ void SimpleChooseLevelScreen::buttonClicked( Button* button )
 	if (button == bSurvival)
 		gameType = GameType::Survival;
 
-	std::string levelId = getUniqueLevelName(levelName);
-	LevelSettings settings(getEpochTimeS(), gameType);
-	minecraft->selectLevel(levelId, levelId, settings);
+	// Read and sanitize name for id. Display name can keep spacing.
+	std::string displayName = Util::stringTrim(levelName);
+	if (displayName.empty())
+		displayName = "World";
+	std::string levelId = displayName;
+	for (int i = 0; i < sizeof(ILLEGAL_FILE_CHARACTERS) / sizeof(char); ++i)
+		levelId = Util::stringReplace(levelId, std::string(1, ILLEGAL_FILE_CHARACTERS[i]), "");
+	if (levelId.empty())
+		levelId = "world";
+	levelId = getUniqueLevelName(levelId);
+
+	// Parse seed: integer if possible, else hash non-empty string.
+	int seed = getEpochTimeS();
+	std::string seedString = Util::stringTrim(seedText);
+	if (!seedString.empty()) {
+		int tmpSeed = 0;
+		if (sscanf(seedString.c_str(), "%d", &tmpSeed) > 0) {
+			seed = tmpSeed;
+		} else {
+			seed = Util::hashCode(seedString);
+		}
+	}
+
+	LevelSettings settings(seed, gameType);
+	minecraft->selectLevel(levelId, displayName, settings);
 	minecraft->hostMultiplayer();
 	minecraft->setScreen(new ProgressScreen());
 	hasChosen = true;

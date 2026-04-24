@@ -3,6 +3,59 @@
 #include "../Minecraft.h"
 #include "../../world/entity/Mob.h"
 
+#ifdef _WIN32
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#endif
+
+#ifdef _WIN32
+static bool _dirExists(const std::string& path) {
+	const DWORD attr = GetFileAttributesA(path.c_str());
+	return (attr != INVALID_FILE_ATTRIBUTES) && (attr & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+static void _scanMusicRecursive(const std::string& root, std::vector<std::string>& out) {
+	WIN32_FIND_DATAA findData;
+	HANDLE handle = FindFirstFileA((root + "\\*").c_str(), &findData);
+	if (handle == INVALID_HANDLE_VALUE) {
+		return;
+	}
+
+	do {
+		const char* name = findData.cFileName;
+		if (!strcmp(name, ".") || !strcmp(name, "..")) {
+			continue;
+		}
+
+		const std::string fullPath = root + "\\" + name;
+		if (findData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+			_scanMusicRecursive(fullPath, out);
+			continue;
+		}
+
+		const size_t dot = fullPath.find_last_of('.');
+		if (dot == std::string::npos) {
+			continue;
+		}
+
+		std::string ext = fullPath.substr(dot);
+		for (size_t i = 0; i < ext.size(); ++i) {
+			ext[i] = (char)tolower((unsigned char)ext[i]);
+		}
+		if (ext == ".wav") {
+			out.push_back(fullPath);
+		}
+	} while (FindNextFileA(handle, &findData));
+
+	FindClose(handle);
+}
+#endif
+
 
 SoundEngine::SoundEngine( float maxDistance )
 :	idCounter(0),
@@ -12,6 +65,11 @@ SoundEngine::SoundEngine( float maxDistance )
 	_z(0),
 	_yRot(0),
 	_invMaxDistance(1.0f / maxDistance)
+#ifdef _WIN32
+,	_musicOrderIndex(0),
+	_musicWasEnabled(false),
+	_musicHasOpenTrack(false)
+#endif
 {
 
 }
@@ -144,6 +202,11 @@ void SoundEngine::init( Minecraft* mc, Options* options )
 	sounds.add("random.fuse", SA_fuse);
 
 #endif
+
+#ifdef _WIN32
+	discoverMusicTracks();
+	_musicWasEnabled = false;
+#endif
 }
 
 void SoundEngine::enable( bool status )
@@ -155,16 +218,24 @@ void SoundEngine::enable( bool status )
 
 void SoundEngine::updateOptions()
 {
-
+#ifdef _WIN32
+	refreshMusicPlayback();
+#endif
 }
 
 void SoundEngine::destroy()
 {
+#ifdef _WIN32
+	stopMusicPlayback();
+#endif
 	//if (loaded) soundSystem.cleanup();
 }
 
 void SoundEngine::update( Mob* player, float a )
 {
+#ifdef _WIN32
+	refreshMusicPlayback();
+#endif
 	if (/*!loaded || */options->sound == 0) return;
 	if (player == NULL) return;
 
@@ -174,8 +245,107 @@ void SoundEngine::update( Mob* player, float a )
 	_yRot = player->yRotO + (player->yRot - player->yRotO) * a;
 
 	soundSystem.setListenerAngle(_yRot);
-	//soundSystem.setListenerPos(_x, _y, _z); //@note: not used, since we translate all sounds to Player space
+	soundSystem.setListenerPos(_x, _y, _z); //@note: not used, since we translate all sounds to Player space
 }
+
+#ifdef _WIN32
+void SoundEngine::discoverMusicTracks()
+{
+	_musicTracks.clear();
+	_musicOrder.clear();
+	_musicOrderIndex = 0;
+
+	char modulePath[MAX_PATH] = { 0 };
+	std::string baseDir = ".";
+	const DWORD len = GetModuleFileNameA(NULL, modulePath, MAX_PATH);
+	if (len > 0 && len < MAX_PATH) {
+		std::string exePath(modulePath, len);
+		const size_t slash = exePath.find_last_of("\\/");
+		if (slash != std::string::npos) {
+			baseDir = exePath.substr(0, slash);
+		}
+	}
+
+	std::vector<std::string> roots;
+	roots.push_back(baseDir + "\\data\\music");
+	roots.push_back(".\\data\\music");
+	roots.push_back(".\\games\\com.mojang\\data\\music");
+	roots.push_back("..\\..\\data\\music");
+
+	for (size_t i = 0; i < roots.size(); ++i) {
+		if (_dirExists(roots[i])) {
+			_scanMusicRecursive(roots[i], _musicTracks);
+		}
+	}
+
+	std::sort(_musicTracks.begin(), _musicTracks.end());
+	_musicTracks.erase(std::unique(_musicTracks.begin(), _musicTracks.end()), _musicTracks.end());
+}
+
+void SoundEngine::stopMusicPlayback()
+{
+	soundSystem.stopMusic();
+	_musicHasOpenTrack = false;
+}
+
+void SoundEngine::playNextMusicTrack()
+{
+	if (_musicTracks.empty()) {
+		return;
+	}
+
+	if (_musicOrder.empty() || _musicOrderIndex >= (int)_musicOrder.size()) {
+		_musicOrder.clear();
+		_musicOrder.reserve(_musicTracks.size());
+		for (int i = 0; i < (int)_musicTracks.size(); ++i) {
+			_musicOrder.push_back(i);
+		}
+
+		for (int i = (int)_musicOrder.size() - 1; i > 0; --i) {
+			const int j = random.nextInt(i + 1);
+			std::swap(_musicOrder[i], _musicOrder[j]);
+		}
+		_musicOrderIndex = 0;
+	}
+
+	const std::string& path = _musicTracks[_musicOrder[_musicOrderIndex++]];
+	stopMusicPlayback();
+	_musicHasOpenTrack = soundSystem.playMusicWavFile(path, Mth::clamp(options->music, 0.0f, 1.0f));
+}
+
+void SoundEngine::refreshMusicPlayback()
+{
+	if (!options) {
+		return;
+	}
+
+	const bool musicEnabled = options->music > 0.0f;
+	if (!musicEnabled) {
+		stopMusicPlayback();
+		_musicWasEnabled = false;
+		return;
+	}
+
+	if (!_musicWasEnabled) {
+		_musicWasEnabled = true;
+	}
+
+	if (_musicTracks.empty()) {
+		return;
+	}
+
+	if (!_musicHasOpenTrack) {
+		playNextMusicTrack();
+		return;
+	}
+
+	soundSystem.setMusicVolume(Mth::clamp(options->music, 0.0f, 1.0f));
+	if (!soundSystem.isMusicPlaying()) {
+		_musicHasOpenTrack = false;
+		playNextMusicTrack();
+	}
+}
+#endif
 
 float SoundEngine::_getVolumeMult( float x, float y, float z )
 {

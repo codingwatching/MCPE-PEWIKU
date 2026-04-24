@@ -24,15 +24,21 @@ Slider::Slider(Minecraft* minecraft, const Options::Option* option, const std::v
   progressMax(1.0) {
 	assert(stepVec.size() > 1);
 	numSteps = sliderSteps.size();
-	if(option != NULL) {
-		curStepValue;
-		int curStep;
+	curStepValue = sliderSteps[0];
+	curStep = 0;
+
+	if (option != NULL) {
 		curStepValue = minecraft->options.getIntValue(option);
-		std::vector<int>::iterator currentItem = std::find(sliderSteps.begin(), sliderSteps.end(), curStepValue);
-		if(currentItem != sliderSteps.end()) {
-			curStep = currentItem - sliderSteps.begin();
+		std::vector<int>::const_iterator currentItem = std::find(sliderSteps.begin(), sliderSteps.end(), curStepValue);
+		if (currentItem != sliderSteps.end()) {
+			curStep = (int)(currentItem - sliderSteps.begin());
+		} else {
+			curStepValue = sliderSteps[0];
+			curStep = 0;
 		}
 	}
+
+	percentage = float(curStep) / float(numSteps - 1);
 }
 
 void Slider::render( Minecraft* minecraft, int xm, int ym ) {
@@ -57,12 +63,21 @@ void Slider::render( Minecraft* minecraft, int xm, int ym ) {
 }
 
 void Slider::mouseClicked( Minecraft* minecraft, int x, int y, int buttonNum ) {
-	if(pointInside(x, y)) {
-		mouseDownOnElement = true;
-	}
+	if (buttonNum != MouseAction::ACTION_LEFT)
+		return;
+
+	if (!pointInside(x, y))
+		return;
+
+	mouseDownOnElement = true;
+	updateFromMouse(minecraft, x);
+	setOption(minecraft);
 }
 
 void Slider::mouseReleased( Minecraft* minecraft, int x, int y, int buttonNum ) {
+	if (buttonNum != MouseAction::ACTION_LEFT)
+		return;
+
 	mouseDownOnElement = false;
 	if(sliderType == SliderStep) {
 		curStep = Mth::floor((percentage * (numSteps-1) + 0.5f));
@@ -77,11 +92,31 @@ void Slider::tick(Minecraft* minecraft) {
 		int xm = Mouse::getX();
 		int ym = Mouse::getY();
 		minecraft->screen->toGUICoordinate(xm, ym);
-		if(mouseDownOnElement) {
-			percentage = float(xm - x) / float(width);
-			percentage = Mth::clamp(percentage, 0.0f, 1.0f);
-			setOption(minecraft);
-		}
+		if (!Mouse::isButtonDown(MouseAction::ACTION_LEFT))
+			mouseDownOnElement = false;
+
+		if (!mouseDownOnElement)
+			return;
+
+		updateFromMouse(minecraft, xm);
+		setOption(minecraft);
+	}
+}
+
+void Slider::updateFromMouse(Minecraft* minecraft, int mouseX) {
+	(void)minecraft;
+	const int xSliderStart = x + 5;
+	const int xSliderEnd = x + width - 5;
+	const int sliderWidth = Mth::Max(1, xSliderEnd - xSliderStart);
+
+	percentage = float(mouseX - xSliderStart) / float(sliderWidth);
+	percentage = Mth::clamp(percentage, 0.0f, 1.0f);
+
+	if (sliderType == SliderStep) {
+		curStep = Mth::floor((percentage * (numSteps - 1)) + 0.5f);
+		curStep = Mth::clamp(curStep, 0, numSteps - 1);
+		curStepValue = sliderSteps[curStep];
+		percentage = float(curStep) / float(numSteps - 1);
 	}
 }
 

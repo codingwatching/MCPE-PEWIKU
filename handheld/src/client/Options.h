@@ -48,6 +48,7 @@ public:
 		static const Option DESTROY_VIBRATION;
 
 		static const Option PIXELS_PER_MILLIMETER;
+		static const Option FOV;
 
 		/*
         static Option* getItem(int id) {
@@ -97,6 +98,8 @@ private:
 	static const float SENSITIVITY_MAX_VALUE;
 	static const float PIXELS_PER_MILLIMETER_MIN_VALUE;
 	static const float PIXELS_PER_MILLIMETER_MAX_VALUE;
+	static const float FOV_MIN_VALUE;
+	static const float FOV_MAX_VALUE;
     static const char* RENDER_DISTANCE_NAMES[];
     static const char* DIFFICULTY_NAMES[];
     static const char* GUI_SCALE[];
@@ -115,6 +118,7 @@ public:
     bool limitFramerate;
     bool fancyGraphics;
     bool ambientOcclusion;
+	int fov;
 	bool useMouseForDigging;
 	bool isLeftHanded;
 	bool destroyVibration;
@@ -205,20 +209,38 @@ public:
             sensitivity = value;
 		} else if (item == &Option::PIXELS_PER_MILLIMETER) {
 			 pixelsPerMillimeter = value;
+		} else if (item == &Option::FOV) {
+			fov = (int)(value + 0.5f);
 		}
 		notifyOptionUpdate(item, value);
+		save();
     }
 	void set(const Option* item, int value) {
 		if(item == &Option::DIFFICULTY) {
 			difficulty = value;
+		} else if (item == &Option::GUI_SCALE) {
+			guiScale = value;
 		}
 		notifyOptionUpdate(item, value);
+		save();
 	}
 
     void toggle(const Option* option, int dir) {
         if (option == &Option::INVERT_MOUSE)	invertYMouse = !invertYMouse;
         if (option == &Option::RENDER_DISTANCE) viewDistance = (viewDistance + dir) & 3;
-        if (option == &Option::GUI_SCALE)		guiScale = (guiScale + dir) & 3;
+        if (option == &Option::GUI_SCALE) {
+			const int steps[] = { 0, 1, 2, 4, 8 };
+			int index = 0;
+			for (int i = 0; i < 5; ++i) {
+				if (guiScale == steps[i]) {
+					index = i;
+					break;
+				}
+			}
+			if (dir >= 0) index = (index + 1) % 5;
+			else          index = (index + 4) % 5;
+			guiScale = steps[index];
+		}
         if (option == &Option::VIEW_BOBBING)	bobView = !bobView;
 		if (option == &Option::THIRD_PERSON)	thirdPersonView = !thirdPersonView;
 		if (option == &Option::HIDE_GUI)		hideGui = !hideGui;
@@ -241,12 +263,16 @@ public:
             ambientOcclusion = !ambientOcclusion;
             //minecraft->levelRenderer.allChanged();
         }
-		notifyOptionUpdate(option, getBooleanValue(option));
+		if (option == &Option::DIFFICULTY || option == &Option::GUI_SCALE)
+			notifyOptionUpdate(option, getIntValue(option));
+		else
+			notifyOptionUpdate(option, getBooleanValue(option));
         save();
     }
 
 	int getIntValue(const Option* item) {
 		if(item == &Option::DIFFICULTY) return difficulty;
+		if(item == &Option::GUI_SCALE) return guiScale;
 		return 0;
 	}
 
@@ -255,6 +281,7 @@ public:
         if (item == &Option::SOUND) return sound;
         if (item == &Option::SENSITIVITY) return sensitivity;
 		if (item == &Option::PIXELS_PER_MILLIMETER) return pixelsPerMillimeter;
+		if (item == &Option::FOV) return (float)fov;
         return 0;
     }
 
@@ -293,6 +320,7 @@ public:
 		if (item == &Option::SOUND) return SOUND_MIN_VALUE;
 		if (item == &Option::SENSITIVITY) return SENSITIVITY_MIN_VALUE;
 		if (item == &Option::PIXELS_PER_MILLIMETER) return PIXELS_PER_MILLIMETER_MIN_VALUE;
+		if (item == &Option::FOV) return FOV_MIN_VALUE;
 		return 0;
 	}
 
@@ -301,6 +329,7 @@ public:
 		if (item == &Option::SOUND) return SOUND_MAX_VALUE;
 		if (item == &Option::SENSITIVITY) return SENSITIVITY_MAX_VALUE;
 		if (item == &Option::PIXELS_PER_MILLIMETER) return PIXELS_PER_MILLIMETER_MAX_VALUE;
+		if (item == &Option::FOV) return FOV_MAX_VALUE;
 		return 1.0f;
 	} 
 
@@ -312,6 +341,7 @@ public:
 	void addOptionToSaveOutput(StringVector& stringVector, std::string name, bool boolValue);
 	void addOptionToSaveOutput(StringVector& stringVector, std::string name, float floatValue);
 	void addOptionToSaveOutput(StringVector& stringVector, std::string name, int intValue);
+	void addOptionToSaveOutput(StringVector& stringVector, std::string name, const std::string& stringValue);
 	void notifyOptionUpdate(const Option* option, bool value);
 	void notifyOptionUpdate(const Option* option, float value);
 	void notifyOptionUpdate(const Option* option, int value);

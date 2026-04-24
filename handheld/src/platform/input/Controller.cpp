@@ -18,11 +18,14 @@ void Controller::feed( int stickIndex, int state, float dx, float dy )
 {
 	if (!isValidStick(stickIndex)) return;
 
+#if !defined(WIN32)
 	if (NUM_STICKS == 2)
 		stickIndex = dx<0? 1 : 2;
+#endif
 
 	isTouchedValues[stickIndex-1] = (state != STATE_RELEASE);
 
+#if !defined(WIN32)
 	// @note: Since I don't know where to put the Xperia Play specific
 	// calculations, I put them here! (normally I would probably have
 	// some kind of (XperiaPlay)ControllerReader but it doesn't make much
@@ -31,6 +34,7 @@ void Controller::feed( int stickIndex, int state, float dx, float dy )
 	// figure this out, at least by JNI/java-call but we arent doing it)
 	static float offsets[3] = {0, 0.64f, -0.64f};
 	dx =  linearTransform(dx + offsets[stickIndex], 0, 2.78f, true);
+#endif
 
 	stickValuesX[stickIndex-1] = dx;
 	stickValuesY[stickIndex-1] = dy;

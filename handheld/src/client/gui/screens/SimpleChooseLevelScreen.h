@@ -7,7 +7,7 @@ class Button;
 class SimpleChooseLevelScreen: public ChooseLevelScreen
 {
 public:
-	SimpleChooseLevelScreen(const std::string& levelName);
+	SimpleChooseLevelScreen(const std::string& levelName, const std::string& seedText = "");
 
 	virtual ~SimpleChooseLevelScreen();
 
@@ -27,6 +27,7 @@ private:
 	bool hasChosen;
 
 	std::string levelName;
+	std::string seedText;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS__DemoChooseLevelScreen_H__*/

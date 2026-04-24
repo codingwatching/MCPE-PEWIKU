@@ -49,7 +49,7 @@ LocalPlayer::LocalPlayer(Minecraft* minecraft, Level* level, User* user, int dim
 	input(NULL),
 	sentInventoryItemId(-1),
 	sentInventoryItemData(-1),
-	autoJumpEnabled(true),
+	autoJumpEnabled(true), // << best feature ever
 	armorTypeHash(0)
 {
 	this->dimension = dimension;

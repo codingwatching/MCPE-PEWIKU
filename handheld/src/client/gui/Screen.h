@@ -56,6 +56,7 @@ protected:
 	virtual void buttonClicked(Button* button) {}
 	virtual void mouseClicked(int x, int y, int buttonNum);
 	virtual void mouseReleased(int x, int y, int buttonNum);
+	virtual void mouseScrolled(int x, int y, int scrollDelta) {}
 
 	virtual void keyPressed(int eventKey);
 	virtual void keyboardNewChar(char inputChar) {}

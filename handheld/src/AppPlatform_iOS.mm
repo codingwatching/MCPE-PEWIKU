@@ -212,6 +212,7 @@ float AppPlatform_iOS::getPixelsPerMillimeter() {
 }
 
 bool AppPlatform_iOS::isTouchscreen()  { return true; }
+bool AppPlatform_iOS::supportsTouchscreen() { return true; }
 
 void AppPlatform_iOS::vibrate(int ms) {
     // Note: In iOS 4, there's no way to set length of the vibration, so it's useless

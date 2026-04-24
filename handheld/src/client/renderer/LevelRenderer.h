@@ -48,6 +48,7 @@ public:
     void renderSameAsLast(int layer, float alpha);
 	void renderHit(Player* player, const HitResult& h, int mode, /*ItemInstance*/void* inventoryItem, float a);
     void renderHitOutline(Player* player, const HitResult& h, int mode, /*ItemInstance*/void* inventoryItem, float a);
+	void renderHitOutlineBold(Player* player, const HitResult& h, int mode, /*ItemInstance*/void* inventoryItem, float a);
 	void renderHitSelect(Player* player, const HitResult& h, int mode, /*ItemInstance*/void* inventoryItem, float a);
 	void entityAdded(Entity* entity);
 

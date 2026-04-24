@@ -13,6 +13,7 @@ public:
 	// Creates a progress slider with no steps
 	Slider(Minecraft* minecraft, const Options::Option* option, float progressMin, float progressMax);
 	Slider(Minecraft* minecraft, const Options::Option* option, const std::vector<int>& stepVec);
+	const Options::Option* getOption() const { return option; }
 	virtual void render( Minecraft* minecraft, int xm, int ym );
 
 	virtual void mouseClicked( Minecraft* minecraft, int x, int y, int buttonNum );
@@ -22,6 +23,7 @@ public:
 	virtual void tick(Minecraft* minecraft);
 	
 private:
+	void updateFromMouse(Minecraft* minecraft, int mouseX);
 	virtual void setOption(Minecraft* minecraft);
 
 private:

@@ -1184,6 +1184,40 @@ void LevelRenderer::addParticle(ParticleType::Id name, float x, float y, float z
 }
 */
 
+void LevelRenderer::renderHitOutlineBold(Player* player, const HitResult& h, int mode, /*ItemInstance*/void* inventoryItem, float a)
+{
+    if (mode == 0 && h.type == TILE) {
+        glEnable2(GL_BLEND);
+        glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glColor4f2(0.0f, 0.0f, 0.0f, 0.4f);
+
+        glLineWidth(4.0f);
+
+        glDisable2(GL_TEXTURE_2D);
+        glDepthMask(false);
+
+        float ss = 0.002f;
+        int tileId = level->getTile(h.x, h.y, h.z);
+
+        if (tileId > 0) {
+            Tile* tile = Tile::tiles[tileId];
+            tile->updateShape(level, h.x, h.y, h.z);
+
+            float xo = player->xOld + (player->x - player->xOld) * a;
+            float yo = player->yOld + (player->y - player->yOld) * a;
+            float zo = player->zOld + (player->z - player->zOld) * a;
+
+            render(tile->getTileAABB(level, h.x, h.y, h.z).grow(ss, ss, ss).cloneMove(-xo, -yo, -zo));
+        }
+
+        glDepthMask(true);
+        glEnable2(GL_TEXTURE_2D);
+        glDisable2(GL_BLEND);
+        glLineWidth(1.0f);
+    }
+}
+
 void LevelRenderer::renderHitSelect( Player* player, const HitResult& h, int mode, /*ItemInstance*/void* inventoryItem, float a )
 {
 	//if (h.type == TILE) LOGI("type: %s @ (%d, %d, %d)\n", Tile::tiles[level->getTile(h.x, h.y, h.z)]->getDescriptionId().c_str(), h.x, h.y, h.z);

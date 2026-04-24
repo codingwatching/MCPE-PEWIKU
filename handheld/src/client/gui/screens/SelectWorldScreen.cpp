@@ -485,6 +485,24 @@ void SelectWorldScreen::keyPressed( int eventKey )
 	Screen::keyPressed(eventKey);
 }
 
+void SelectWorldScreen::mouseScrolled(int x, int y, int scrollDelta)
+{
+	if (!worldsList)
+		return;
+
+	// Restrict wheel scrolling to the world carousel bounds.
+	if (y < 26 || y > height - 32)
+		return;
+
+	const int steps = Mth::clamp(Mth::abs(scrollDelta), 1, 3);
+	for (int i = 0; i < steps; ++i) {
+		if (scrollDelta > 0)
+			worldsList->stepLeft();
+		else if (scrollDelta < 0)
+			worldsList->stepRight();
+	}
+}
+
 //
 // Delete World Screen
 //

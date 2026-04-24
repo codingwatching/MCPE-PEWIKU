@@ -36,7 +36,7 @@ You *can* to go to the `handheld`/`project` folder and select a platform, but it
 
 ### Build all
 useful for dev  
-build linux and server: `make build_all`  
+build both client and server: `make build_all`  
 ### Standalone server
 build: `make build-server`  
 build & run: `make run-server`  
