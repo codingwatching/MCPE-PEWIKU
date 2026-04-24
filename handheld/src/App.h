@@ -7,6 +7,9 @@
 #ifdef STANDALONE_SERVER
 #define NO_EGL
 #endif
+#ifdef WIN32
+#define NO_EGL
+#endif
 
 #include "AppPlatform.h"
 #ifndef NO_EGL 

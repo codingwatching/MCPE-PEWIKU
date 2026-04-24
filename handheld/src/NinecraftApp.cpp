@@ -150,7 +150,7 @@ void NinecraftApp::update()
 
 	Minecraft::update();
 
-	// swapBuffers();
+	swapBuffers();
 	Mouse::reset2();
 
     // Restart the server if (our modded) RakNet reports an error
