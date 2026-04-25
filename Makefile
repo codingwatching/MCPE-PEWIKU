@@ -12,7 +12,7 @@ deps:
 	@echo "  sudo apt install build-essential cmake libx11-dev libegl1-mesa-dev libgles1-mesa-dev libpng-dev libglew-dev libsdl2-dev libgles-dev libegl-dev pkg-config"
 
 configure:
-	$(CMAKE) -S . -B $(BUILD_DIR) -DDEBUG=$(DEBUG)
+	$(CMAKE) -S . -B $(BUILD_DIR) -DDEBUG=$(DEBUG) -DLOCAL=$(LOCAL)
 
 build-client: configure
 	@echo "Jobs: " $(JOBS)

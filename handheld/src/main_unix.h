@@ -281,8 +281,28 @@ int main(int argc, char** argv) {
 	appContext.platform = platform;
 
 	App* app = new MAIN_CLASS();
-	((MAIN_CLASS*)app)->externalStoragePath = std::string(getenv("HOME") ? getenv("HOME") : ".") + "/.pewiku/";
-	((MAIN_CLASS*)app)->externalCacheStoragePath = ((MAIN_CLASS*)app)->externalStoragePath;
+	char* basePath = SDL_GetBasePath();
+	std::string executableDirectory = ".";
+	if (basePath && *basePath) {
+		executableDirectory = basePath;
+		if (!executableDirectory.empty() && executableDirectory[executableDirectory.size() - 1] == '/') {
+			executableDirectory.pop_back();
+		}
+	}
+	if (basePath) {
+		SDL_free(basePath);
+	}
+
+#ifdef LOCAL
+	((MAIN_CLASS*)app)->externalStoragePath = executableDirectory;
+	((MAIN_CLASS*)app)->externalCacheStoragePath = executableDirectory;
+#else
+	const char* homeDirectory = getenv("HOME");
+	std::string storagePath = homeDirectory && *homeDirectory ? homeDirectory : ".";
+	storagePath += "/.pewiku/";
+	((MAIN_CLASS*)app)->externalStoragePath = storagePath;
+	((MAIN_CLASS*)app)->externalCacheStoragePath = storagePath;
+#endif
 
 	app->init(appContext);
 	app->setSize(g_winWidth, g_winHeight);

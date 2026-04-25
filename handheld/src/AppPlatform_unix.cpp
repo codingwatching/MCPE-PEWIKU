@@ -1,17 +1,38 @@
 #include "AppPlatform_unix.h"
 #include "platform/log.h"
+#include "world/level/storage/FolderMethods.h"
+#include <SDL2/SDL.h>
 #include <png.h>
+#include <cstdio>
 #include <fstream>
 
 // Declare globals defined in main_unix.h
 extern int g_winWidth;
 extern int g_winHeight;
 
+AppPlatform_unix::AppPlatform_unix() {
+    char* basePath = SDL_GetBasePath();
+    if (basePath && *basePath) {
+        std::string executableDirectory(basePath);
+        if (!executableDirectory.empty() && executableDirectory[executableDirectory.size() - 1] == '/') {
+            executableDirectory.pop_back();
+        }
+        dataRoot = executableDirectory + "/data";
+    }
+    if (basePath) {
+        SDL_free(basePath);
+    }
+
+    if (dataRoot.empty()) {
+        dataRoot = "data";
+    }
+}
+
 bool AppPlatform_unix::supportsTouchscreen()  { return false; }
 
 TextureData AppPlatform_unix::loadTexture(const std::string& filename_, bool textureFolder) {
     TextureData out;
-    std::string filename = textureFolder ? std::string("data/images/") + filename_ : filename_;
+    std::string filename = textureFolder ? resolveAssetPath("images/" + filename_) : filename_;
     std::ifstream source(filename.c_str(), std::ios::binary);
     if (source) {
         png_structp pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -48,6 +69,23 @@ TextureData AppPlatform_unix::loadTexture(const std::string& filename_, bool tex
     }
 }
 
+BinaryBlob AppPlatform_unix::readAssetFile(const std::string& filename) {
+    std::string assetPath = resolveAssetPath(filename);
+    FILE* file = fopen(assetPath.c_str(), "rb");
+    if (!file) {
+        return BinaryBlob();
+    }
+
+    int size = getRemainingFileSize(file);
+    BinaryBlob blob;
+    blob.size = size;
+    blob.data = new unsigned char[size];
+
+    fread(blob.data, 1, size, file);
+    fclose(file);
+    return blob;
+}
+
 int AppPlatform_unix::getScreenWidth() {
     return g_winWidth;
 }
@@ -64,4 +102,14 @@ void AppPlatform_unix::saveScreenshot(const std::string&, int, int) {
 }
 
 void AppPlatform_unix::finish() {
+}
+
+std::string AppPlatform_unix::resolveAssetPath(const std::string& relativePath) const {
+    const std::string primaryPath = dataRoot + "/" + relativePath;
+    std::ifstream primaryFile(primaryPath.c_str(), std::ios::binary);
+    if (primaryFile.good()) {
+        return primaryPath;
+    }
+
+    return "data/" + relativePath;
 }

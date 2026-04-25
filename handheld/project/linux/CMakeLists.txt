@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 project(pewiku_linux LANGUAGES C CXX)
+option(LOCAL "Store desktop user data next to the executable" OFF)
 
 set(HANDHELD_DIR "${CMAKE_SOURCE_DIR}/handheld")
 set(SRC_DIR "${HANDHELD_DIR}/src")
@@ -42,6 +43,9 @@ if(WIN32 OR (UNIX AND NOT APPLE AND NOT ANDROID))
     add_compile_definitions(PLATFORM_DESKTOP)
 endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE NO_EGL USE_VBO)
+if(LOCAL)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE LOCAL)
+endif()
 
 find_package(Threads REQUIRED)
 find_package(X11 REQUIRED)

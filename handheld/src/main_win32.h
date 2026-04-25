@@ -310,8 +310,18 @@ int main(void) {
 	App* app = new MAIN_CLASS();
 
 	g_app = app;
-	((MAIN_CLASS*)g_app)->externalStoragePath = ".";
-	((MAIN_CLASS*)g_app)->externalCacheStoragePath = ".";
+	char modulePath[MAX_PATH] = { 0 };
+	std::string executableDirectory = ".";
+	const DWORD modulePathLength = GetModuleFileNameA(NULL, modulePath, MAX_PATH);
+	if (modulePathLength > 0 && modulePathLength < MAX_PATH) {
+		std::string executablePath(modulePath, modulePathLength);
+		const size_t slashPos = executablePath.find_last_of("\\/");
+		if (slashPos != std::string::npos) {
+			executableDirectory = executablePath.substr(0, slashPos);
+		}
+	}
+	((MAIN_CLASS*)g_app)->externalStoragePath = executableDirectory;
+	((MAIN_CLASS*)g_app)->externalCacheStoragePath = executableDirectory;
 	g_app->init(appContext);
 	g_app->setSize(appContext.platform->getScreenWidth(), appContext.platform->getScreenHeight());
 
