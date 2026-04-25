@@ -186,7 +186,8 @@ Minecraft::Minecraft()
 	_powerVr(false),
 	commandPort(4711),
 	reserved_d1(0),reserved_d2(0),
-	reserved_f1(0),reserved_f2(0)
+	reserved_f1(0),reserved_f2(0),
+	_forceTouchscreen(false)
 {
 //#ifdef ANDROID
 
@@ -632,13 +633,15 @@ void Minecraft::tickInput() {
 		return;
 	}
 
-#ifdef PLATFORM_DESKTOP
-	bool mouseDiggable = true;
-	bool allowGuiClicks = !mouseGrabbed;
-#else
-	bool mouseDiggable = !gui.isInside(Mouse::getX(), Mouse::getY());
-	bool allowGuiClicks = true;
-#endif
+	bool mouseDiggable;
+	bool allowGuiClicks;
+	if (useTouchscreen()) {
+		mouseDiggable = !gui.isInside(Mouse::getX(), Mouse::getY());
+		allowGuiClicks = true;
+	} else {
+		mouseDiggable = true;
+		allowGuiClicks = !mouseGrabbed;
+	}
 
 	TIMER_PUSH("mouse");
 	while (Mouse::next()) {
@@ -675,9 +678,9 @@ void Minecraft::tickInput() {
 		if (e.action == MouseAction::ACTION_WHEEL) {
 			Inventory* v = player->inventory;
 			int numSlots = gui.getNumSlots();
-		#ifndef PLATFORM_DESKTOP
-			numSlots--;
-		#endif
+			if (useTouchscreen()) {
+				numSlots--;
+			}
 			int slot = (v->selected - e.dy + numSlots) % numSlots;
 			v->selectSlot(slot);
 		}
@@ -710,9 +713,9 @@ void Minecraft::tickInput() {
 					int slot = digit - 1;
 
 					int numSlots = gui.getNumSlots();
-				#ifndef PLATFORM_DESKTOP
+				if (useTouchscreen()) {
 					numSlots--;
-				#endif
+				}
 					if (slot >= 0 && slot < numSlots)
 						player->inventory->selectSlot(slot);
 
@@ -852,6 +855,16 @@ void Minecraft::tickInput() {
 						_perfRenderer->debugFpsMeterKeyPress(key - '0');
 					}
 				}
+				if (key == Keyboard::KEY_F10) {
+					_forceTouchscreen = !_forceTouchscreen;
+					if (_forceTouchscreen) {
+						releaseMouse();
+					} else {
+						mouseGrabbed = false;
+						grabMouse();
+					}
+					reloadOptions();
+				}
 			#endif
 
 			if (key == Keyboard::KEY_ESCAPE)
@@ -870,8 +883,7 @@ void Minecraft::tickInput() {
 
 		//if (!isPressed) LOGI("Key released: %d\n", key);
 
-	#ifndef PLATFORM_DESKTOP
-		if (!options.useMouseForDigging) {
+		if (useTouchscreen() && !options.useMouseForDigging) {
 			int passedTime = getTimeMs() - lastTickTime;
 			if (passedTime > 200) continue;
 
@@ -886,7 +898,6 @@ void Minecraft::tickInput() {
 				handleBuildAction(&bai);
 			}
 		}
-	#endif
 	}
 
 	TIMER_POP_PUSH("tickbuild");
@@ -900,17 +911,17 @@ void Minecraft::tickInput() {
 			handleBuildAction(&bai);
 	}
 
-	bool isTryingToDestroyBlock = (options.useMouseForDigging
-			?	(Mouse::isButtonDown(MouseAction::ACTION_LEFT) && mouseDiggable)
-			:	Keyboard::isKeyDown(options.keyDestroy.key))
-		||	(buildHandled && bai.isRemove());
+	bool isTryingToDestroyBlock = (buildHandled && bai.isRemove())
+			|| (!useTouchscreen() && (options.useMouseForDigging
+				?	(Mouse::isButtonDown(MouseAction::ACTION_LEFT) && mouseDiggable)
+				:	Keyboard::isKeyDown(options.keyDestroy.key)));
 
 	TIMER_POP_PUSH("handlemouse");
-#if defined(PLATFORM_DESKTOP)
-	handleMouseDown(MouseAction::ACTION_LEFT, isTryingToDestroyBlock);
-#else
-	handleMouseDown(MouseAction::ACTION_LEFT, isTryingToDestroyBlock || (buildHandled && bai.isInteract()));
-#endif
+	if (!useTouchscreen()) {
+		handleMouseDown(MouseAction::ACTION_LEFT, isTryingToDestroyBlock);
+	} else {
+		handleMouseDown(MouseAction::ACTION_LEFT, isTryingToDestroyBlock || (buildHandled && bai.isInteract()));
+	}
 
 	lastTickTime = getTimeMs();
 
@@ -928,15 +939,15 @@ void Minecraft::tickInput() {
 
 void Minecraft::handleMouseDown(int button, bool down) {
 #ifndef STANDALONE_SERVER
-#ifndef PLATFORM_DESKTOP
-	//(??)
-	if(player->isUsingItem()) {
-		if(!down && !Keyboard::isKeyDown(options.keyUse.key)) {
-			gameMode->releaseUsingItem(player);
+	if (useTouchscreen()) {
+		//(??)
+		if(player->isUsingItem()) {
+			if(!down && !Keyboard::isKeyDown(options.keyUse.key)) {
+				gameMode->releaseUsingItem(player);
+			}
+			return;
 		}
-		return;
 	}
-#endif
 	if(player->isSleeping()) {
 		return;
 	}
@@ -1120,7 +1131,9 @@ void Minecraft::grabMouse()
 #ifndef STANDALONE_SERVER
 	if (mouseGrabbed) return;
 	mouseGrabbed = true;
-	mouseHandler.grab();
+	if (!useTouchscreen()) {
+		mouseHandler.grab();
+	}
 	//setScreen(NULL);
 #endif
 }
@@ -1140,22 +1153,21 @@ void Minecraft::releaseMouse()
 }
 
 bool Minecraft::useTouchscreen() {
-#ifdef PLATFORM_DESKTOP
-	return false;
+#if defined(DEBUG)
+	if (_forceTouchscreen) return true;
 #endif
-	return options.useTouchScreen || !_supportsNonTouchscreen;
+	return !_supportsNonTouchscreen;
 }
 bool Minecraft::supportNonTouchScreen() {
 	return _supportsNonTouchscreen;
 }
 void Minecraft::init()
 {
+	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
 	options.minecraft = this;
 	options.initDefaultValues();
 #ifndef STANDALONE_SERVER
 	checkGlError("Init enter");
-
-	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
 
 	LOGI("IS TOUCHSCREEN? %d\n", options.useTouchScreen);
 

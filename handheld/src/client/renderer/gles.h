@@ -42,7 +42,9 @@
 	#include <GL/glew.h>
 	#include <GL/gl.h>
 
+	#undef glFogx
 	#define glFogx(a,b)	glFogi(a,b)
+	#undef glOrthof
 	#define glOrthof(a,b,c,d,e,f) glOrtho(a,b,c,d,e,f)
 #endif
 

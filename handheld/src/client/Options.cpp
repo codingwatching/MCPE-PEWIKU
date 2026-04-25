@@ -37,10 +37,7 @@ void Options::initDefaultValues() {
 	fancyGraphics = true;//false;
 	ambientOcclusion = true;
 	fov = 70;
-	if(minecraft->supportNonTouchScreen())
-		useTouchScreen = false;
-	else
-		useTouchScreen = true;
+	useTouchScreen = !minecraft->supportNonTouchScreen();
 	pixelsPerMillimeter = minecraft->platform()->getPixelsPerMillimeter();
 	//useMouseForDigging = true;
 

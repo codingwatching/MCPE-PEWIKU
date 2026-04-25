@@ -9,6 +9,7 @@
 #include "platform/input/Keyboard.h"
 #include "platform/input/Mouse.h"
 #include "platform/input/Multitouch.h"
+#include "AppPlatform_unix.h"
 
 #include <SDL2/SDL.h>
 #include <cstdint>
@@ -22,13 +23,13 @@
 #include <vector>
 
 static bool g_running_unix = true;
-static bool g_mouseGrabbed = false;
-static bool g_windowActive = true;
+bool g_mouseGrabbed = false;
+bool g_windowActive = true;
 
-static SDL_Window* g_win = nullptr;
-static SDL_GLContext g_glContext = nullptr;
-static int g_winWidth = 848;
-static int g_winHeight = 480;
+SDL_Window* g_win = nullptr;
+SDL_GLContext g_glContext = nullptr;
+int g_winWidth = 848;
+int g_winHeight = 480;
 
 static int g_savedMouseX = 0, g_savedMouseY = 0;
 static bool g_isWarping = false;
@@ -275,65 +276,6 @@ int main(int argc, char** argv) {
 
 	AppContext appContext;
 	appContext.doRender = true;
-
-	class AppPlatform_unix : public AppPlatform
-	{
-	public:
-		bool isTouchscreen() {
-			return false;
-		}
-		TextureData loadTexture(const std::string& filename_, bool textureFolder) {
-			TextureData out;
-			std::string filename = textureFolder ? std::string("data/images/") + filename_ : filename_;
-			std::ifstream source(filename.c_str(), std::ios::binary);
-			if (source) {
-				png_structp pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-				if (!pngPtr)
-					return out;
-
-				png_infop infoPtr = png_create_info_struct(pngPtr);
-				if (!infoPtr) {
-					png_destroy_read_struct(&pngPtr, NULL, NULL);
-					return out;
-				}
-
-				png_set_read_fn(pngPtr, (png_voidp)&source, [](png_structp pngPtr, png_bytep data, png_size_t length) {
-					((std::istream*)png_get_io_ptr(pngPtr))->read((char*)data, length);
-				});
-				png_read_info(pngPtr, infoPtr);
-				out.w = png_get_image_width(pngPtr, infoPtr);
-				out.h = png_get_image_height(pngPtr, infoPtr);
-				png_bytep* rowPtrs = new png_bytep[out.h];
-				out.data = new unsigned char[4 * out.w * out.h];
-				out.memoryHandledExternally = false;
-				int rowStrideBytes = 4 * out.w;
-				for (int i = 0; i < out.h; ++i) {
-					rowPtrs[i] = (png_bytep)&out.data[i * rowStrideBytes];
-				}
-				png_read_image(pngPtr, rowPtrs);
-				png_destroy_read_struct(&pngPtr, &infoPtr, (png_infopp)0);
-				delete[](png_bytep) rowPtrs;
-				source.close();
-				return out;
-			} else {
-				LOGI("Couldn't find file: %s\n", filename.c_str());
-				return out;
-			}
-		}
-		int getScreenWidth() {
-			return g_winWidth;
-		}
-		int getScreenHeight() {
-			return g_winHeight;
-		}
-		float getPixelsPerMillimeter() {
-			return 4.0f;
-		}
-		void saveScreenshot(const std::string&, int, int) {
-		}
-		void finish() {
-		}
-	};
 
 	AppPlatform_unix* platform = new AppPlatform_unix();
 	appContext.platform = platform;

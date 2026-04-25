@@ -57,11 +57,23 @@ LRESULT WINAPI windowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	case WM_KEYDOWN: {
 		if (wParam == 33) toggleResolutions(hWnd, -1);
 		if (wParam == 34) toggleResolutions(hWnd, +1);
-		Keyboard::feed((unsigned char)wParam, 1);
+		unsigned char key = (unsigned char)wParam;
+		if (wParam >= VK_F1 && wParam <= VK_F12)
+			key = Keyboard::KEY_F1 + (wParam - VK_F1);
+		else if (wParam >= 'A' && wParam <= 'Z')
+			key = 'a' + (wParam - 'A');
+
+		Keyboard::feed(key, 1);
 		return 0;
 	}
 	case WM_KEYUP: {
-		Keyboard::feed((unsigned char)wParam, 0);
+		unsigned char key = (unsigned char)wParam;
+		if (wParam >= VK_F1 && wParam <= VK_F12)
+			key = Keyboard::KEY_F1 + (wParam - VK_F1);
+		else if (wParam >= 'A' && wParam <= 'Z')
+			key = 'a' + (wParam - 'A');
+
+		Keyboard::feed(key, 0);
 		return 0;
 	}
 	case WM_CHAR: {
@@ -315,6 +327,7 @@ int main(void) {
 		}
 
 		processMouseInput();
+		Multitouch::commit();
 		app->update();
 		SwapBuffers(hdc);
 	}

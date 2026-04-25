@@ -226,6 +226,7 @@ private:
 	//int _respawnPlayerTicks;
 	Player* _pendingRemovePlayer; // @attn @todo @fix: remove this shait and fix the respawn behaviour
 
+	bool _forceTouchscreen;
 	PerfRenderer* _perfRenderer;
 	CommandServer* _commandServer;
 };

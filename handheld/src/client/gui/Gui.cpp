@@ -185,13 +185,11 @@ void Gui::handleClick(int button, int x, int y) {
 	int slot = getSlotIdAt(x, y);
 	if (slot != -1)
 	{
-	#ifndef PLATFORM_DESKTOP
-		if (slot == (getNumSlots()-1))
+		if (minecraft->useTouchscreen() && (slot == (getNumSlots()-1)))
 		{
 			minecraft->screenChooser.setScreen(SCREEN_BLOCKSELECTION);
 		}
 		else
-	#endif
 		{
 			minecraft->player->inventory->selectSlot(slot);
 			itemNameOverlayTime = 0;
@@ -414,12 +412,9 @@ void Gui::onConfigChanged( const Config& c ) {
 				num++;
 			}
 		}
-		_numSlots = num;
-#if defined(__APPLE__)
-		_numSlots = Mth::Min(7, _numSlots);
-#endif
+		_numSlots = Mth::Min(8, num);
 	} else {
-		_numSlots = Inventory::MAX_SELECTION_SIZE; // Xperia Play
+		_numSlots = Inventory::MAX_SELECTION_SIZE;
 	}
 	MAX_MESSAGE_WIDTH = c.guiWidth;
 }
@@ -457,9 +452,9 @@ void Gui::tickItemDrop()
 	static bool isCurrentlyActive = false;
 	isCurrentlyActive = false;
 	int slots = getNumSlots();
-#ifndef PLATFORM_DESKTOP
-	slots--;
-#endif
+	if (minecraft->useTouchscreen()) {
+		slots--;
+	}
 	if (Mouse::isButtonDown(MouseAction::ACTION_LEFT)) {
 		int slot = getSlotIdAt(Mouse::getX(), Mouse::getY());
 		if (slot >= 0 && slot < slots) {
@@ -718,7 +713,9 @@ void Gui::renderChatMessages( const int screenHeight, unsigned int max, bool isC
 }
 
 void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
-	glColor4f2(1, 1, 1, .5);
+	glEnable2(GL_BLEND);
+	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f2(1, 1, 1, 0.65f);
 	minecraft->textures->loadAndBindTexture("gui/gui.png");
 
 	Inventory* inventory = minecraft->player->inventory;
@@ -765,10 +762,9 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 
 	float x = baseItemX;
 	int slots = getNumSlots();
-	// TODO: if using touchscreen
-#ifndef PLATFORM_DESKTOP
-	slots--;
-#endif
+	if (minecraft->useTouchscreen()) {
+		slots--;
+	}
 	for (int i = 0; i < slots; i++) {
 		renderSlot(i, (int)x, ySlot, a);
 		x += 20;
@@ -781,10 +777,10 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 	//renderSlotWatch.stop();
 	//renderSlotWatch.printEvery(100, "Render slots:");
 
-	//int x = screenWidth / 2 + slots * 10 + (slots) * 20 + 2;
-#ifndef PLATFORM_DESKTOP
-	blit(screenWidth / 2 + 10 * slots - 20 + 4, ySlot + 6, 242, 252, 14, 4, 14, 4);
-#endif
+
+	if (minecraft->useTouchscreen()) {
+		blit(screenWidth / 2 + 10 * getNumSlots() - 20 + 4, ySlot + 6, 242, 252, 14, 4, 14, 4);
+	}
 
 	minecraft->textures->loadAndBindTexture("gui/gui_blocks.png");
 	t.endOverrideAndDraw();
