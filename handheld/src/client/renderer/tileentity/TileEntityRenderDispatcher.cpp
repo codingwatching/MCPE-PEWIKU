@@ -55,10 +55,6 @@ void TileEntityRenderDispatcher::prepare( Level* level, Textures* textures, Font
 	xPlayer = player->xOld + (player->x - player->xOld) * a;
 	yPlayer = player->yOld + (player->y - player->yOld) * a;
 	zPlayer = player->zOld + (player->z - player->zOld) * a;
-
-	//        xPlayer -= xPlayerOffs;
-	//        yPlayer -= yPlayerOffs;
-	//        zPlayer -= zPlayerOffs;
 }
 
 void TileEntityRenderDispatcher::render( TileEntity* e, float a )

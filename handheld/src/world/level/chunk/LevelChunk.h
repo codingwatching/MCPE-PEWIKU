@@ -131,11 +131,12 @@ public:
 	bool createdFromSave;
     bool lastSaveHadEntities;
     long lastSaveTime;
-protected:
-	unsigned char* blocks;
-
+public:
 	static const int EntityBlocksArraySize = 128/16;
 	std::vector<Entity*> entityBlocks[EntityBlocksArraySize];
+
+protected:
+	unsigned char* blocks;
 
     TEMap tileEntities;
 };

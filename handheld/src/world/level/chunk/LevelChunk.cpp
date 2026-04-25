@@ -9,6 +9,7 @@
 #include "../tile/entity/TileEntity.h"
 #include "../tile/EntityTile.h"
 #include "../LevelConstants.h"
+#include <algorithm>
 
 /*static*/
 bool LevelChunk::touchedSky = false;
@@ -444,21 +445,21 @@ bool LevelChunk::isSkyLit( int x, int y, int z )
 void LevelChunk::load()
 {
 	loaded = true;
-	/*        level->tileEntityList.addAll(tileEntities.values());
-	for (int i = 0; i < entityBlocks.length; i++) {
-	level->addEntities(entityBlocks[i]);
-	}
-	*/
+    for (TEMap::iterator it = tileEntities.begin(); it != tileEntities.end(); ++it) {
+        level->tileEntities.push_back(it->second);
+    }
 }
 
 void LevelChunk::unload()
 {
 	loaded = false;
-	/*        level->tileEntityList.removeAll(tileEntities.values());
-	for (int i = 0; i < entityBlocks.length; i++) {
-	level->removeEntities(entityBlocks[i]);
-	}
-	*/
+    for (TEMap::iterator it = tileEntities.begin(); it != tileEntities.end(); ++it) {
+        TileEntity* te = it->second;
+        std::vector<TileEntity*>::iterator vit = std::find(level->tileEntities.begin(), level->tileEntities.end(), te);
+        if (vit != level->tileEntities.end()) {
+            level->tileEntities.erase(vit);
+        }
+    }
 }
 
 void LevelChunk::markUnsaved()
@@ -590,8 +591,12 @@ void LevelChunk::addTileEntity(TileEntity* te) {
 	int yy = te->y;
 	int zz = te->z - zt;
 	setTileEntity(xx, yy, zz, te);
-	if (loaded) {
-		level->tileEntities.push_back(te);
+
+	if (level) {
+		std::vector<TileEntity*>::iterator it = std::find(level->tileEntities.begin(), level->tileEntities.end(), te);
+		if (it == level->tileEntities.end()) {
+			level->tileEntities.push_back(te);
+		}
 	}
 }
 

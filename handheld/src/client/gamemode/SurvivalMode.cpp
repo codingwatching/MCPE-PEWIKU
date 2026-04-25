@@ -62,9 +62,8 @@ bool SurvivalMode::destroyBlock( int x, int y, int z, int face ) {
 
 	ItemInstance* item = minecraft->player->inventory->getSelected();
 	if (item != NULL) {
-		item->mineBlock(t, x, y, z);
+		item->mineBlock(t, x, y, z, minecraft->player);
 		if (item->count == 0) {
-			//item->snap(minecraft->player);
 			minecraft->player->inventory->clearSlot(minecraft->player->inventory->selected);
 		}
 	}

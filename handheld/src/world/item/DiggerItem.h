@@ -21,14 +21,13 @@ public:
     }
 
     //@Override
-    void hurtEnemy(ItemInstance* itemInstance, Mob* mob/*, Mob* attacker*/) {
-        itemInstance->hurt(2);//, attacker); //@todo
-        //return true;
+    void hurtEnemy(ItemInstance* itemInstance, Mob* victim, Mob* attacker) {
+        itemInstance->hurtAndBreak(2, attacker);
     }
 
     //@Override
-    bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z/*, Mob* owner*/) {
-        itemInstance->hurt(1);//, owner);
+    bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z, Mob* owner) {
+        itemInstance->hurtAndBreak(1, owner);
         return true;
     }
 

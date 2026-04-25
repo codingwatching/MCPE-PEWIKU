@@ -17,7 +17,7 @@ bool HoeItem::useOn( ItemInstance* itemInstance, Player* player, Level* level, i
 	if (face != 0 && above == 0 && targetType == Tile::grass->id || targetType == Tile::dirt->id) {
 		Tile* tile = Tile::farmland;
 		level->playSound(x + 0.5f, y + 0.5f, z + 0.5f, tile->soundType->getStepSound(), (tile->soundType->getVolume() + 1) / 2, tile->soundType->getPitch() * 0.8f);
-		itemInstance->hurt(1/*, player*/);
+		itemInstance->hurtAndBreak(1, player);
 		if (level->isClientSide) return true;
 		level->setTile(x, y, z, tile->id);
 		if(targetType == Tile::grass->id && level->random.nextInt( 8 ) == 0) {

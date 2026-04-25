@@ -21,12 +21,12 @@ public:
     }
 
     /*@Override*/
-    bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z/*, Mob* owner*/) {
+    bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z, Mob* owner) {
         if (tile == ((Tile*)Tile::leaves)->id || tile == Tile::web->id /*|| tile == Tile::tallgrass->id || tile == Tile::vine->id*/) {
-            itemInstance->hurt(1);//, owner);
+            itemInstance->hurtAndBreak(1, owner);
             return true;
         }
-		return super::mineBlock(itemInstance, tile, x, y, z); // owner);
+		return super::mineBlock(itemInstance, tile, x, y, z, owner);
     }
 
     /*@Override*/

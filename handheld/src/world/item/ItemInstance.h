@@ -63,16 +63,17 @@ public:
 	int getAuxValue() const;
 	void setAuxValue(int value);
 
-    void hurt(int i);
-    void hurtEnemy(Mob* mob);
+    bool hurt(int i);
+    void hurtAndBreak(int i, Mob* owner);
+    void hurtEnemy(Mob* victim, Mob* attacker);
 
-	void mineBlock(int tile, int x, int y, int z);
+	void mineBlock(int tile, int x, int y, int z, Mob* owner);
     int getAttackDamage(Entity* entity);
     bool canDestroySpecial(Tile* tile);
     void snap(Player* player);
     ItemInstance useTimeDepleted(Level* level, Player* player);
 
-    void interactEnemy(Mob* mob);
+    void interactEnemy(Mob* victim, Mob* attacker);
 
 	//@huge @attn @note: this returns a NEW'ed copy, change?
 	ItemInstance* copy() const;

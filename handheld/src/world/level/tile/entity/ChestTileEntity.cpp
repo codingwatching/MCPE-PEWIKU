@@ -13,7 +13,8 @@ ChestTileEntity::ChestTileEntity()
 	hasCheckedNeighbors(false),
 	n(NULL), s(NULL), w(NULL), e(NULL)
 {
-	//rendererId = TR_CHEST_RENDERER;
+	//TODO-PORT: Chest lid animation and model enabled via TileEntityRenderer.
+	rendererId = TR_CHEST_RENDERER;
 }
 
 int ChestTileEntity::getContainerSize() const
@@ -69,13 +70,12 @@ std::string ChestTileEntity::getName() const
 }
 
 bool ChestTileEntity::shouldSave() {
-	for (int i = 0; i < ItemsSize; ++i)
-		if (items[i] && !items[i]->isNull()) return true;
-	return false;
+	return true;
 }
 
 void ChestTileEntity::load( CompoundTag* base )
 {
+	rendererId = TR_CHEST_RENDERER;
 	super::load(base);
 
 	if (!base->contains("Items"))//, Tag::TAG_List)
@@ -167,6 +167,7 @@ void ChestTileEntity::checkNeighbors()
 
 void ChestTileEntity::tick()
 {
+	rendererId = TR_CHEST_RENDERER;
 	super::tick();
 	checkNeighbors();
 
@@ -222,12 +223,14 @@ void ChestTileEntity::triggerEvent( int b0, int b1 )
 void ChestTileEntity::startOpen()
 {
 	openCount++;
+	//TODO-PORT: In 0.8.1 this triggers a TileEventPacket (type 1, data = openCount) to sync animation with other players.
 	level->tileEvent(x, y, z, ChestTile::EVENT_SET_OPEN_COUNT, openCount);
 }
 
 void ChestTileEntity::stopOpen()
 {
 	openCount--;
+	//TODO-PORT: In 0.8.1 this triggers a TileEventPacket (type 1, data = openCount) to sync animation with other players.
 	level->tileEvent(x, y, z, ChestTile::EVENT_SET_OPEN_COUNT, openCount);
 }
 

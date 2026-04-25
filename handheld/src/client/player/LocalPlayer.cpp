@@ -8,6 +8,7 @@
 #include "../../world/level/Level.h"
 #include "../../world/level/tile/Tile.h"
 #include "../../world/level/tile/entity/TileEntity.h"
+#include "../../world/level/tile/entity/ChestTileEntity.h"
 #include "../../world/level/material/Material.h"
 #include "../../network/packet/ContainerClosePacket.h"
 #include "../../network/packet/MovePlayerPacket.h"
@@ -219,6 +220,7 @@ void LocalPlayer::aiStep() {
 /*public*/
 void LocalPlayer::closeContainer() {
 	if (level->isClientSide) {
+		level->playSound(this, "random.chestclosed", 0.5f, level->random.nextFloat() * 0.1f + 0.9f);
 		ContainerClosePacket packet(containerMenu->containerId);
 		minecraft->raknetInstance->send(packet);
 	}
@@ -437,8 +439,11 @@ void LocalPlayer::openFurnace( FurnaceTileEntity* e ) {
 
 void LocalPlayer::openContainer( ChestTileEntity* container ) {
 #ifndef STANDALONE_SERVER
-	if (!minecraft->isCreativeMode())
+	if (!minecraft->isCreativeMode()) {
+		//TODO-PORT: Local trigger for chest sound/animation until networking is ported
+		container->startOpen();
 		minecraft->setScreen( new ChestScreen(this, container) );
+	}
 #endif
 }
 

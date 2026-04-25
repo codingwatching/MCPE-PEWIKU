@@ -20,41 +20,35 @@ void ChestRenderer::render( TileEntity* entity, float x, float y, float z, float
 			((ChestTile*)tile)->recalcLockDir(chest->level, chest->x, chest->y, chest->z);
 			data = chest->getData();
 		}
-
-		chest->checkNeighbors();
 	}
-	if (chest->n != NULL || chest->w != NULL) return;
+	//TODO-PORT: Large chest rendering is incomplete, disabling early return to prevent transparent chests.
+	//if (chest->n != NULL || chest->w != NULL) return;
 
-	ChestModel* model;
-	//if (chest->e != NULL || chest->s != NULL) {
-	//	//model = &largeChestModel;
-	//	bindTexture("item/largechest.png");
-	//} else
+	if (chest->e != NULL || chest->s != NULL) {
+		bindTexture("item/chest/double_normal.png");
+	} else
 	{
-		model = &chestModel;
-		bindTexture("item/chest.png");
+		bindTexture("item/chest/normal.png");
 	}
 
-	glPushMatrix2();
-	glColor4f2(1, 1, 1, 1);
-	glTranslatef2(x, y + 1, z + 1);
-	glScalef2(1, -1, -1);
+	glPushMatrix();
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_DEPTH_TEST);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+	glColor4f(1, 1, 1, 1);
+	glTranslatef(x, y + 1, z + 1);
+	glScalef(1, -1, -1);
 
-	glTranslatef2(0.5f, 0.5f, 0.5f);
+	glTranslatef(0.5f, 0.5f, 0.5f);
 	GLfloat rot = 0;
 	if (data == 2) rot = 180;
 	if (data == 3) rot = 0;
 	if (data == 4) rot = 90;
 	if (data == 5) rot = -90;
 
-	if (data == 2 && chest->e != NULL) {
-		glTranslatef2(1, 0, 0);
-	}
-	if (data == 5 && chest->s != NULL) {
-		glTranslatef2(0, 0, -1);
-	}
-	glRotatef2(rot, 0, 1, 0);
-	glTranslatef2(-0.5f, -0.5f, -0.5f);
+	glRotatef(rot, 0, 1, 0);
+	glTranslatef(-0.5f, -0.5f, -0.5f);
 
 	float open = chest->oOpenness + (chest->openness - chest->oOpenness) * a;
 	if (chest->n != NULL) {
@@ -68,9 +62,15 @@ void ChestRenderer::render( TileEntity* entity, float x, float y, float z, float
 
 	open = 1 - open;
 	open = 1 - open * open * open;
+    float xRot = -(open * Mth::PI / 2);
 
-	model->lid.xRot = -(open * Mth::PI / 2);
-	model->render();
-	glPopMatrix2();
-	glColor4f2(1, 1, 1, 1);
+	if (chest->e != NULL || chest->s != NULL) {
+        largeChestModel.lid.xRot = xRot;
+        largeChestModel.render();
+	} else {
+        chestModel.lid.xRot = xRot;
+        chestModel.render();
+    }
+	glPopMatrix();
+	glColor4f(1, 1, 1, 1);
 }

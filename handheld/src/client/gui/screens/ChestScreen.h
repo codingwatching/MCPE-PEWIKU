@@ -25,6 +25,7 @@ public:
 	~ChestScreen();
 
 	void init();
+	void removed();
 	void setSize(int width, int height);
 	void setupPositions();
 

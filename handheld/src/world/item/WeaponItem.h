@@ -34,13 +34,12 @@ public:
         return 1.5f;
     }
 
-    void hurtEnemy(ItemInstance* itemInstance, Mob* mob/*, Mob* attacker*/) {
-        itemInstance->hurt(1);// attacker);
-        //return true;
+    void hurtEnemy(ItemInstance* itemInstance, Mob* victim, Mob* attacker) {
+        itemInstance->hurtAndBreak(1, attacker);
     }
 
-    bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z/*, Mob* owner*/) {
-        itemInstance->hurt(2);//, owner);
+    bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z, Mob* owner) {
+        itemInstance->hurtAndBreak(2, owner);
         return true;
     }
 

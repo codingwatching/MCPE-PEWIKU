@@ -293,10 +293,10 @@ public:
         return maxDamage;
     }
 
-    virtual void hurtEnemy(ItemInstance* itemInstance, Mob* mob) {
+    virtual void hurtEnemy(ItemInstance* itemInstance, Mob* victim, Mob* attacker) {
     }
 
-    virtual bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z) {
+    virtual bool mineBlock(ItemInstance* itemInstance, int tile, int x, int y, int z, Mob* owner) {
 		return false;
     }
 
@@ -308,7 +308,7 @@ public:
         return false;
     }
 
-    virtual void interactEnemy(ItemInstance* itemInstance, Mob* mob) {
+    virtual void interactEnemy(ItemInstance* itemInstance, Mob* victim, Mob* attacker) {
     }
 
     virtual Item* handEquipped() {

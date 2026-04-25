@@ -1,6 +1,8 @@
 #include "ItemInstance.h"
 #include "Item.h"
+#include "../level/Level.h"
 #include "../level/tile/Tile.h"
+#include "../entity/Mob.h"
 #include "../../nbt/CompoundTag.h"
 
 ItemInstance::ItemInstance() {
@@ -127,24 +129,31 @@ int ItemInstance::getMaxDamage() const {
     return Item::items[id]->getMaxDamage();
 }
 
-void ItemInstance::hurt(int i) {
+bool ItemInstance::hurt(int damage) {
     if (!isDamageableItem())
-        return;
+        return false;
 
-    auxValue += i;
-    if (auxValue > getMaxDamage()) {
+    auxValue += damage;
+    return auxValue > getMaxDamage();
+}
+
+void ItemInstance::hurtAndBreak(int damage, Mob* owner) {
+    if (hurt(damage)) {
+        if (owner != NULL) {
+            owner->level->playSound(owner, "random.break", 1.0f, 0.8f + owner->level->random.nextFloat() * 0.4f);
+        }
         count--;
         if (count < 0) count = 0;
         auxValue = 0;
     }
 }
 
-void ItemInstance::hurtEnemy(Mob* mob) {
-    Item::items[id]->hurtEnemy(this, mob);
+void ItemInstance::hurtEnemy(Mob* victim, Mob* attacker) {
+    Item::items[id]->hurtEnemy(this, victim, attacker);
 }
 
-void ItemInstance::mineBlock(int tile, int x, int y, int z) {
-    Item::items[id]->mineBlock(this, tile, x, y, z);
+void ItemInstance::mineBlock(int tile, int x, int y, int z, Mob* owner) {
+    Item::items[id]->mineBlock(this, tile, x, y, z, owner);
 }
 
 int ItemInstance::getAttackDamage(Entity* entity) {
@@ -158,8 +167,8 @@ bool ItemInstance::canDestroySpecial(Tile* tile) {
 void ItemInstance::snap(Player* player) {
 }
 
-void ItemInstance::interactEnemy(Mob* mob) {
-    Item::items[id]->interactEnemy(this, mob);
+void ItemInstance::interactEnemy(Mob* victim, Mob* attacker) {
+    Item::items[id]->interactEnemy(this, victim, attacker);
 }
 
 ItemInstance* ItemInstance::copy() const {

@@ -184,11 +184,9 @@ public:
     }
 
     void animateTick(Level* level, int x, int y, int z, Random* random) {
-		return; //@fire
-
-        //if (random.nextInt(24) == 0) {
-        //    level->playSound(x + 0.5f, y + 0.5f, z + 0.5f, "fire.fire", 1 + random.nextFloat(), random.nextFloat() * 0.7f + 0.3f);
-        //}
+        if (random->nextInt(24) == 0) {
+            level->playSound(x + 0.5f, y + 0.5f, z + 0.5f, "fire.fire", 1.0f + random->nextFloat(), random->nextFloat() * 0.7f + 0.3f);
+        }
 
         if (level->isSolidBlockingTile(x, y - 1, z) || Tile::fire->canBurn(level, x, y - 1, z)) {
             for (int i = 0; i < 3; i++) {

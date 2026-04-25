@@ -172,6 +172,11 @@ void ChestScreen::init() {
 	guiPaneFrame    = builder.createSymmetrical(IntRectangle(28, 42, 4, 4), 1, 1)->exclude(4);
 }
 
+void ChestScreen::removed() {
+	//TODO-PORT: Local trigger for chest sound/animation until networking is ported
+	chest->stopOpen();
+	super::removed();
+}
 
 void ChestScreen::setSize(int w, int h) {
     Screen::setSize(w, h);

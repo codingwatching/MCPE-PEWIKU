@@ -697,7 +697,7 @@ void Player::interact(Entity* entity) {
     if (entity->interact(this)) return;
 	ItemInstance* item = inventory->getSelected();
 	if (item != NULL && entity->isMob()) {
-        item->interactEnemy((Mob*)entity);
+        item->interactEnemy((Mob*)entity, this);
         if (item->count <= 0) {
             //item.snap(this);
             inventory->clearSlot(inventory->selected);
@@ -722,7 +722,7 @@ void Player::attack(Entity* entity) {
         entity->hurt(this, dmg);
         ItemInstance* item = inventory->getSelected();
         if (item != NULL && entity->isMob() && abilities.instabuild != true) {
-            item->hurtEnemy((Mob*) entity);
+            item->hurtEnemy((Mob*) entity, this);
             if (item->count <= 0) {
                 //item->snap(this);
                 inventory->clearSlot(inventory->selected);
@@ -894,7 +894,7 @@ void Player::hurtArmor( int dmg ) {
 		if (!ItemInstance::isArmorItem(&item))
 			continue;
 
-		item.hurt(dmg);
+		item.hurtAndBreak(dmg, this);
 		if (item.count == 0) {
 			item.setNull();
 		}

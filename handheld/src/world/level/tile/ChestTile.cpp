@@ -9,8 +9,8 @@ ChestTile::ChestTile( int id )
 :	super(id, Material::wood)
 {
 	tex = 10 + 16;
-	const float m = 0.025f;
-	setShape(m, 0, m, 1-m, 1-m-m, 1-m);
+	const float m = 0.0625f;
+	setShape(m, 0, m, 1.0f - m, 1.0f - m * 2.0f, 1.0f - m);
 }
 
 bool ChestTile::isSolidRender()
@@ -25,8 +25,8 @@ bool ChestTile::isCubeShaped()
 
 int ChestTile::getRenderShape()
 {
-	return super::getRenderShape();
-	//return Tile::SHAPE_ENTITYTILE_ANIMATED;
+	//TODO-PORT: Changed to SHAPE_ENTITYTILE_ANIMATED to allow separate lid rendering.
+	return Tile::SHAPE_ENTITYTILE_ANIMATED;
 }
 
 void ChestTile::onPlace( Level* level, int x, int y, int z )
