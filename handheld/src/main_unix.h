@@ -43,7 +43,7 @@ void platform_setMouseGrabbed(bool grab) {
 }
 
 static unsigned char transformKey(SDL_Keycode keysym) {
-    if (keysym >= SDLK_a && keysym <= SDLK_z) return keysym - 32;
+    if (keysym >= SDLK_a && keysym <= SDLK_z) return keysym;
     if (keysym >= SDLK_0 && keysym <= SDLK_9) return keysym;
     
     switch(keysym) {
@@ -175,6 +175,10 @@ int main(int argc, char** argv) {
     }
     
     SDL_GL_MakeCurrent(g_win, g_glContext);
+
+#ifdef PLATFORM_DESKTOP
+    SDL_ShowCursor(SDL_DISABLE);
+#endif
     
     glInit();
 
