@@ -17,7 +17,6 @@ set(PEWIKU_EXCLUDED_SOURCES
     "${SRC_DIR}/main_android_java.cpp"
     "${SRC_DIR}/main_dedicated.cpp"
     "${SRC_DIR}/main_rpi.cpp"
-    "${SRC_DIR}/platform/audio/SoundSystemAL.cpp"
     "${SRC_DIR}/platform/audio/SoundSystemSL.cpp"
     "${SRC_DIR}/world/level/tile/SandTile.cpp"
     "${SRC_DIR}/raknet/RakNetSocket2_Windows_Linux_360.cpp"
@@ -52,6 +51,7 @@ find_package(X11 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(OpenAL REQUIRED)
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -60,6 +60,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     PNG::PNG
     GLEW::GLEW
     SDL2::SDL2
+    OpenAL::OpenAL
     OpenGL::GL
     dl
     m

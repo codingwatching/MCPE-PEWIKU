@@ -5,7 +5,7 @@
 
 #if defined(ANDROID) && !defined(PRE_ANDROID23)
 	#include "../../platform/audio/SoundSystemSL.h"
-#elif defined(__APPLE__)
+#elif defined(__APPLE__) || (defined(PLATFORM_DESKTOP) && !defined(_WIN32) && !defined(NO_SOUND))
     #include "../../platform/audio/SoundSystemAL.h"
 #elif defined(_WIN32)
 	#include "../../platform/audio/SoundSystemWin32.h"
@@ -23,11 +23,15 @@ class Options;
 
 class SoundEngine
 {
+#if defined(PLATFORM_DESKTOP)
+    static const int SOUND_DISTANCE = 24;
+#else
     static const int SOUND_DISTANCE = 16;
+#endif
 
 	#if defined(ANDROID) && !defined(PRE_ANDROID23) && !defined(RPI)
 		SoundSystemSL soundSystem;
-    #elif defined(__APPLE__)
+    #elif defined(__APPLE__) || (defined(PLATFORM_DESKTOP) && !defined(_WIN32) && !defined(NO_SOUND))
         SoundSystemAL soundSystem;
 	#elif defined(_WIN32)
 		SoundSystemWin32 soundSystem;

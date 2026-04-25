@@ -117,6 +117,10 @@ int Monster::getCreatureBaseType() const {
 	return MobTypes::BaseEnemy;
 }
 
+float Monster::getSoundVolume() {
+	return 0.8f;
+}
+
 Mob* Monster::getTarget() {
 	if (targetId == 0) return NULL;
 	return level->getMob(targetId);

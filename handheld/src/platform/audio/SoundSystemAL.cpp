@@ -71,9 +71,9 @@ void SoundSystemAL::init()
 		for(int index = 0; index < MaxNumSources; index++) {
             ALuint sourceID = _sources[index];
             
-            alSourcef(sourceID, AL_REFERENCE_DISTANCE, 5.0f);
-            alSourcef(sourceID, AL_MAX_DISTANCE, 16.0f);
-            alSourcef(sourceID, AL_ROLLOFF_FACTOR, 6.0f);
+            alSourcef(sourceID, AL_REFERENCE_DISTANCE, 6.0f);
+            alSourcef(sourceID, AL_MAX_DISTANCE, 20.0f);
+            alSourcef(sourceID, AL_ROLLOFF_FACTOR, 4.5f);
 		}
         
 		float listenerPos[] = {0, 0, 0};
@@ -247,7 +247,10 @@ bool SoundSystemAL::getBufferId(const SoundDesc& sound, ALuint* buf) {
     *buf = bufferID;
     _buffers.push_back(buffer);
 
-    // @huge @attn @note @fix: The original data is free'd
+    // Embedded desktop PCM blobs live in static storage, so they must stay alive
+    // for the whole process and must not be deleted here.
+#if !defined(PLATFORM_DESKTOP)
     sound.destroy();
+#endif
     return true;
 }

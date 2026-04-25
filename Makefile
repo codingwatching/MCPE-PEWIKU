@@ -25,6 +25,9 @@ build-server: configure
 run-client: build-client
 	./$(BUILD_DIR)/handheld/project/linux/pewiku_linux
 
+run-client-no-build:
+	./$(BUILD_DIR)/handheld/project/linux/pewiku_linux
+
 run-server: build-server
 	./$(BUILD_DIR)/handheld/project/dedicated_server/pewiku_server
 

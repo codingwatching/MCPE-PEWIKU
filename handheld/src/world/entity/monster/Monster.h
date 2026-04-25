@@ -26,6 +26,7 @@ public:
     bool canSpawn();
 
 	int getCreatureBaseType() const;
+	float getSoundVolume();
 
 	bool doHurtTarget(Entity* target);
 	void setTarget(Mob* mob);
