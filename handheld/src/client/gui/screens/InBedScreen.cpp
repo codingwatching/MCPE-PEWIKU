@@ -41,9 +41,16 @@ void InBedScreen::render( int xm, int ym, float a ) {
 	glDisable(GL_BLEND);
 }
 
+void InBedScreen::keyPressed( int eventKey ) {
+	if (eventKey == Keyboard::KEY_ESCAPE || eventKey == Keyboard::KEY_E) {
+		minecraft->player->stopSleepInBed(true, true, true);
+	} else {
+		super::keyPressed(eventKey);
+	}
+}
+
 void InBedScreen::buttonClicked( Button* button ) {
 	if (button == bWakeUp) {
 		minecraft->player->stopSleepInBed(true, true, true);
-		minecraft->setScreen(NULL);
 	}
 }

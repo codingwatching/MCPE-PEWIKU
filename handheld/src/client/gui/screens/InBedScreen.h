@@ -6,6 +6,7 @@ class Button;
 
 class InBedScreen: public Screen
 {
+	typedef Screen super;
 public:
 	InBedScreen();
 
@@ -17,6 +18,7 @@ public:
 
 	void render(int xm, int ym, float a);
 
+	void keyPressed( int eventKey );
 	void buttonClicked(Button* button);
 
 private:

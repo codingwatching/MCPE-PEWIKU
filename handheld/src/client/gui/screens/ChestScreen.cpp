@@ -210,6 +210,14 @@ void ChestScreen::tick() {
 	}
 }
 
+void ChestScreen::keyPressed( int eventKey ) {
+	if (eventKey == Keyboard::KEY_ESCAPE || eventKey == Keyboard::KEY_E) {
+		minecraft->player->closeContainer();
+	} else {
+		super::keyPressed(eventKey);
+	}
+}
+
 void ChestScreen::handleRenderPane(Touch::InventoryPane* pane, Tesselator& t, int xm, int ym, float a) {
 	if (pane) {
 		int ms, id;

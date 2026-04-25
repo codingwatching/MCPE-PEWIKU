@@ -275,6 +275,15 @@ void FurnaceScreen::render(int xm, int ym, float a) {
 	blit(xx1, yy, 144, 72, bpx, 16, bpx+bpx, 32);
 }
 
+void FurnaceScreen::keyPressed( int eventKey )
+{
+	if (eventKey == Keyboard::KEY_ESCAPE || eventKey == Keyboard::KEY_E) {
+		minecraft->player->closeContainer();
+	} else {
+		super::keyPressed(eventKey);
+	}
+}
+
 void FurnaceScreen::buttonClicked(Button* button) {
 	int slot = button->id;
 

@@ -22,3 +22,11 @@ void ChatScreen::render(int xm, int ym, float a)
 		minecraft->setScreen(NULL);
 	}
 }
+
+void ChatScreen::keyPressed( int eventKey ) {
+	if (eventKey == Keyboard::KEY_ESCAPE) {
+		minecraft->setScreen(NULL);
+	} else {
+		super::keyPressed(eventKey);
+	}
+}

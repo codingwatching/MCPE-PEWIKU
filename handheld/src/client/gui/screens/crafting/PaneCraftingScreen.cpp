@@ -428,8 +428,7 @@ void PaneCraftingScreen::clearCategoryItems()
 void PaneCraftingScreen::keyPressed( int eventKey )
 {
 	if (eventKey == Keyboard::KEY_ESCAPE || eventKey == Keyboard::KEY_E) {
-		minecraft->setScreen(NULL);
-		//minecraft->grabMouse();
+		minecraft->player->closeContainer();
 	} else {
 		super::keyPressed(eventKey);
 	}

@@ -29,6 +29,7 @@ public:
 	void setupPositions();
 
 	void tick();
+	void keyPressed( int eventKey );
 	void render(int xm, int ym, float a);
 	bool renderGameBehind();
 	void buttonClicked(Button* button);
