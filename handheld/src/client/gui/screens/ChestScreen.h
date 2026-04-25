@@ -32,7 +32,7 @@ public:
 	void render(int xm, int ym, float a);
 	bool renderGameBehind();
 	void buttonClicked(Button* button);
-	void mouseScrolled(int x, int y, int scrollDelta);
+	//void mouseScrolled(int x, int y, int scrollDelta);
 
 	// IInventoryPaneCallback
 	bool addItem(const Touch::InventoryPane* pane, int itemId);
