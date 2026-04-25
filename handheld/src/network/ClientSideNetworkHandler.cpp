@@ -138,13 +138,8 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, StartGam
 {
 	LOGI("StartGamePacket\n");
 
-#ifdef PLATFORM_DESKTOP
-	if (packet->gameType != GameType::Creative) {
-		//(??)
-		minecraft->setScreen(new DisconnectionScreen("Could not connect: Incompatible server!"));
-		return;
-	}
-#endif
+	// Desktop survival block removed
+
 
 	const std::string& levelId = LevelStorageSource::TempLevelId;
 	LevelStorageSource* storageSource = minecraft->getLevelSource();

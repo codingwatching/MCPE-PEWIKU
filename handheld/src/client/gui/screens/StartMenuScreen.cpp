@@ -24,8 +24,8 @@
 
 // Some kind of default settings, might be overridden in ::init
 StartMenuScreen::StartMenuScreen()
-:	bHost(    2, 0, 0, 160, 24, "Start Game"),
-	bJoin(    3, 0, 0, 160, 24, "Join Game"),
+:	bHost(    2, 0, 0, 160, 24, "Play"),
+	bJoin(    3, 0, 0, 160, 24, "Play on Realms"),
 	bOptions( 4, 0, 0,  78, 22, "Options"),
 	bBuy(     5, 0, 0, 78, 22, "Buy"),
 	bTest(    999, 0, 0, 78, 22, "Create")
@@ -85,28 +85,26 @@ void StartMenuScreen::init()
 }
 
 void StartMenuScreen::setupPositions() {
-	int yBase = height / 2 + 25;
+	int width = this->width;
+	int v3 = this->height / 2;
+	bHost.y = v3 - 3;
+	int v4 = v3 + 25;
+	v3 += 55;
+	bOptions.y = v3;
+	bBuy.y = v3;
+	bTest.y = v3;
+	bJoin.y = v4;
 
-	//#ifdef ANDROID
-	bHost.y =	 yBase - 28;
-#ifdef PLATFORM_DESKTOP
-	bJoin.y =	 yBase + 4;
-#else
-	bJoin.y =	 yBase;
-#endif
-
-	bOptions.y = yBase + 28 + 2;
-	bTest.y = bBuy.y = bOptions.y;
-	//#endif
-
-	// Center buttons
 	bHost.x = (width - bHost.width) / 2;
-	bJoin.x = (width - bJoin.width) / 2;
-	bOptions.x = (width - bJoin.width) / 2;
-	bTest.x = bBuy.x = bOptions.x + bOptions.width + 4;
+	int v7 = (width - bJoin.width) / 2;
+	bJoin.x = v7;
+	bOptions.x = v7;
+	int v8 = v7 + bOptions.width + 4;
+	bBuy.x = v8;
+	bTest.x = v8;
 
 	copyrightPosX = width - minecraft->font->width(copyright) - 1;
-	versionPosX = (width - minecraft->font->width(version)) / 2;// - minecraft->font->width(version) - 2;
+	versionPosX = (width - minecraft->font->width(version)) / 2;
 }
 
 void StartMenuScreen::tick() {
@@ -191,19 +189,7 @@ void StartMenuScreen::render( int xm, int ym, float a )
 
 void StartMenuScreen::_updateLicense()
 {
-	int id = minecraft->getLicenseId();
-	if (LicenseCodes::isReady(id))
-	{
-		if (LicenseCodes::isOk(id))
-			bJoin.active = bHost.active = bOptions.active = true;
-		else
-		{
-			bool hasBuyButton = minecraft->platform()->hasBuyButtonWhenInvalidLicense();
-			minecraft->setScreen(new InvalidLicenseScreen(id, hasBuyButton));
-		}
-	} else {
-		bJoin.active = bHost.active = bOptions.active = false;
-	}
+	bJoin.active = bHost.active = bOptions.active = true;
 }
 
 bool StartMenuScreen::handleBackEvent( bool isDown ) {
