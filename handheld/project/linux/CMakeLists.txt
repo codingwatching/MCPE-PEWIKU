@@ -38,27 +38,25 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     "${SRC_DIR}/raknet"
 )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE OPENGL_ES)
 if(WIN32 OR (UNIX AND NOT APPLE AND NOT ANDROID))
     add_compile_definitions(PLATFORM_DESKTOP)
 endif()
+target_compile_definitions(${PROJECT_NAME} PRIVATE NO_EGL USE_VBO)
 
 find_package(Threads REQUIRED)
 find_package(X11 REQUIRED)
 find_package(PNG REQUIRED)
-# find_package(GLEW REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(SDL2 REQUIRED)
-find_library(EGL_LIBRARY NAMES EGL REQUIRED)
-find_library(GLES_LIBRARY NAMES GLESv1_CM GLESv2 GLES REQUIRED)
+find_package(OpenGL REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     Threads::Threads
     X11::X11
     PNG::PNG
-#    GLEW::GLEW
+    GLEW::GLEW
     SDL2::SDL2
-    ${EGL_LIBRARY}
-    ${GLES_LIBRARY}
+    OpenGL::GL
     dl
     m
 )
