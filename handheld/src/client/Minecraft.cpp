@@ -664,13 +664,13 @@ void Minecraft::tickInput() {
 		if (e.action == MouseAction::ACTION_LEFT && e.data == MouseAction::DATA_DOWN) {
 			if (allowGuiClicks && gui.isInside(Mouse::getX(), Mouse::getY())) {
 				gui.handleClick(MouseAction::ACTION_LEFT, Mouse::getX(), Mouse::getY());
-			} else if (!screen && mouseDiggable) {
+			} else if (!screen && mouseDiggable && !useTouchscreen()) {
 				handleMouseClick(MouseAction::ACTION_LEFT);
 			}
 		}
 		
 		if (e.action == MouseAction::ACTION_RIGHT && e.data == MouseAction::DATA_DOWN) {
-			if (!screen && mouseDiggable) {
+			if (!screen && mouseDiggable && !useTouchscreen()) {
 				handleMouseClick(MouseAction::ACTION_RIGHT);
 			}
 		}
