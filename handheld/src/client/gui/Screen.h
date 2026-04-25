@@ -22,7 +22,7 @@ public:
     void init(Minecraft* minecraft, int width, int height);
 	virtual void init();
 
-    void setSize(int width, int height);
+    virtual void setSize(int width, int height);
 	virtual void setupPositions() {};
 
 	virtual void updateEvents();

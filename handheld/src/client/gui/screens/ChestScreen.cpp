@@ -172,6 +172,11 @@ void ChestScreen::init() {
 	guiPaneFrame    = builder.createSymmetrical(IntRectangle(28, 42, 4, 4), 1, 1)->exclude(4);
 }
 
+
+void ChestScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    setupPositions(); // To recreate the panes
+}
 void ChestScreen::setupPositions() {
 	// Left  - Categories
 	bHeader.x = 0;

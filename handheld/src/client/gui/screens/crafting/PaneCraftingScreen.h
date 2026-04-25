@@ -44,6 +44,7 @@ public:
 
     void init();
 	void setupPositions();
+	virtual void setSize(int w, int h) override;
 
 	void tick();
 	void render(int xm, int ym, float a);

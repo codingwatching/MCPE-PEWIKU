@@ -3,8 +3,8 @@
 
 #include "BaseContainerScreen.h"
 
-#include "../components/InventoryPane.h"
 #include "../components/Button.h"
+#include "../components/InventoryPane.h"
 
 class Font;
 class CItem;
@@ -14,29 +14,31 @@ class FillingContainer;
 class ChestTileEntity;
 class Tesselator;
 
-class ChestScreen:	public BaseContainerScreen,
-					public Touch::IInventoryPaneCallback
+class ChestScreen : public BaseContainerScreen, public Touch::IInventoryPaneCallback
 {
 	typedef BaseContainerScreen super;
 	typedef std::vector<CItem*> ItemList;
 	friend class ItemPane;
+
 public:
-    ChestScreen(Player* player, ChestTileEntity* chest);
+	ChestScreen(Player* player, ChestTileEntity* chest);
 	~ChestScreen();
 
-    void init();
+	void init();
+	void setSize(int width, int height);
 	void setupPositions();
 
 	void tick();
 	void render(int xm, int ym, float a);
 	bool renderGameBehind();
 	void buttonClicked(Button* button);
+	void mouseScrolled(int x, int y, int scrollDelta);
 
 	// IInventoryPaneCallback
 	bool addItem(const Touch::InventoryPane* pane, int itemId);
-	bool isAllowed( int slot );
-	std::vector<const ItemInstance*> getItems( const Touch::InventoryPane* forPane );
-	//const ItemList& getItems(const ItemPane* forPane);
+	bool isAllowed(int slot);
+	std::vector<const ItemInstance*> getItems(const Touch::InventoryPane* forPane);
+	// const ItemList& getItems(const ItemPane* forPane);
 private:
 	void setupPane();
 
@@ -52,7 +54,7 @@ private:
 	Touch::InventoryPane* inventoryPane;
 	Touch::InventoryPane* chestPane;
 	IntRectangle panesBbox;
-	
+
 	std::vector<const ItemInstance*> inventoryItems;
 	std::vector<const ItemInstance*> chestItems;
 	bool doRecreatePane;

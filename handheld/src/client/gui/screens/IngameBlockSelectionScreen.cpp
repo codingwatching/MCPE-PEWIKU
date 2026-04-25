@@ -71,6 +71,15 @@ void IngameBlockSelectionScreen::removed()
 	minecraft->gui.inventoryUpdated();
 }
 
+
+void IngameBlockSelectionScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    _area = RectangleArea((float)getSlotPosX(0) - 4,
+                          (float)getSlotPosY(0) - 4,
+                          (float)getSlotPosX(InventoryCols) + 4, 
+                          (float)getSlotPosY(InventoryRows) + 4);
+    bArmor.y = h - bArmor.height;
+}
 void IngameBlockSelectionScreen::renderSlots()
 {
 	//static Stopwatch w;

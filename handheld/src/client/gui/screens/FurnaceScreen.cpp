@@ -178,6 +178,11 @@ void FurnaceScreen::setupPositions() {
 	}
 }
 
+void FurnaceScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    setupPositions();
+}
+
 void FurnaceScreen::tick() {
 	if (inventoryPane)
 		inventoryPane->tick();

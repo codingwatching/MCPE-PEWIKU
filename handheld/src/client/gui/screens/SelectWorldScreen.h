@@ -80,6 +80,7 @@ public:
 	virtual ~SelectWorldScreen();
 
 	virtual void init();
+	virtual void setSize(int width, int height);
 	virtual void setupPositions();
 	virtual void tick();
 

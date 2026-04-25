@@ -398,6 +398,19 @@ void SelectWorldScreen::init()
 	tabButtons.push_back(&bBack);
 }
 
+
+void SelectWorldScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    if (worldsList) {
+        delete worldsList;
+        worldsList = new WorldSelectionList(minecraft, w, h);
+        for (unsigned int i = 0; i < levels.size(); ++i) {
+            if (levels[i].id != LevelStorageSource::TempLevelId)
+                worldsList->levels.push_back( levels[i] );
+        }
+        worldsList->commit();
+    }
+}
 void SelectWorldScreen::setupPositions() {
 	int yBase = height - 28;
 

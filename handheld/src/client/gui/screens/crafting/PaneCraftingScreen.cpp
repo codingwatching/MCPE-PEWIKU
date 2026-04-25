@@ -190,6 +190,11 @@ void PaneCraftingScreen::setupPositions() {
 	buttonClicked(_categoryButtons[pane?oldCategory:0]);
 }
 
+void PaneCraftingScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    setupPositions();
+}
+
 void PaneCraftingScreen::tick() {
 	if (pane) pane->tick();
 }

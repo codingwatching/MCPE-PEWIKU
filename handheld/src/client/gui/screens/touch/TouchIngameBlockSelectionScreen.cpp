@@ -139,8 +139,21 @@ void IngameBlockSelectionScreen::setupPositions() {
 	clippingArea.h = (int)(Gui::GuiScale * 24);
 }
 
-void IngameBlockSelectionScreen::removed()
-{
+void IngameBlockSelectionScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    
+    // Clear buttons and inventory pane before re-init to avoid duplication/leaks
+    buttons.clear();
+    if (_blockList) {
+        delete _blockList;
+        _blockList = NULL;
+    }
+    
+    init();
+    setupPositions();
+}
+
+void IngameBlockSelectionScreen::removed() {
 	minecraft->gui.inventoryUpdated();
 }
 

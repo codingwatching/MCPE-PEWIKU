@@ -23,6 +23,7 @@ public:
 
 	virtual void init();
 	virtual void setupPositions();
+	virtual void setSize(int w, int h) override;
 	virtual void removed();
 
 	void tick();

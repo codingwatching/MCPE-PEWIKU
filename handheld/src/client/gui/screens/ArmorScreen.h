@@ -27,6 +27,7 @@ public:
 	void setupPositions();
 
 	void tick();
+	virtual void setSize(int w, int h) override;
 	void render(int xm, int ym, float a);
 	bool renderGameBehind();
 	void keyPressed( int eventKey );

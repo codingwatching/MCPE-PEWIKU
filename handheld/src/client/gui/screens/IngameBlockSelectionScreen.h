@@ -13,6 +13,7 @@ public:
 	virtual ~IngameBlockSelectionScreen() {}
 
 	virtual void init();
+	virtual void setSize(int width, int height);
 	virtual void removed();
 
 	void render(int xm, int ym, float a);

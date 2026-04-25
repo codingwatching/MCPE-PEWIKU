@@ -151,6 +151,11 @@ void ArmorScreen::setupPositions() {
 	setupInventoryPane();
 }
 
+void ArmorScreen::setSize(int w, int h) {
+    Screen::setSize(w, h);
+    setupPositions();
+}
+
 void ArmorScreen::tick() {
 	if (inventoryPane)
 		inventoryPane->tick();
