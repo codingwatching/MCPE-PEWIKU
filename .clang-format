@@ -22,6 +22,9 @@ SpaceBeforeParensOptions:
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 
+PackConstructorInitializers: Never
+BreakConstructorInitializers: BeforeColon
+
 PointerAlignment: Left
 ReferenceAlignment: Left
 
