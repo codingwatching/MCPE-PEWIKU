@@ -353,8 +353,8 @@ float SoundEngine::_getVolumeMult( float x, float y, float z )
 	const float dy = y - _y;
 	const float dz = z - _z;
 	const float dist = Mth::sqrt(dx*dx + dy*dy + dz*dz);
-	const float out =  Mth::clamp(1.0f - dist*_invMaxDistance, -1.0f, 1.0f);
-	return out;
+	float fade = 1.0f - dist * _invMaxDistance;
+	return (fade > 0.0f) ? (fade * fade) : 0.0f;
 }
 
 #if defined(PRE_ANDROID23)
