@@ -210,6 +210,9 @@ void PaneCraftingScreen::render(int xm, int ym, float a) {
 	// Buttons (Left side + crafting)
 	super::render(xm, ym, a);
 
+	// TODO: when 0.8 gui would be added, enable this
+	// minecraft->gui.renderToolBar(a, 1.0f);
+
 	// Mid
 	r.start();
 	// Blit frame

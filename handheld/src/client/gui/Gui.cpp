@@ -101,7 +101,9 @@ void Gui::render(float a, bool mouseFree, int xMouse, int yMouse) {
 		glEnable(GL_DEPTH_TEST);
 	}
 
-	renderToolBar(a, ySlot, screenWidth);
+	if (!minecraft->screen) {
+		renderToolBar(a, 0.65f);
+	}
 
 
 	//font->drawShadow(APP_NAME, 2, 2, 0xffffffff);
@@ -712,10 +714,14 @@ void Gui::renderChatMessages( const int screenHeight, unsigned int max, bool isC
 	}
 }
 
-void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
+void Gui::renderToolBar( float partialTicks, float alpha ) {
+	const int screenWidth = (int)(minecraft->width * InvGuiScale);
+	const int screenHeight = (int)(minecraft->height * InvGuiScale);
+	const int ySlot = screenHeight - 16 - 3;
+
 	glEnable2(GL_BLEND);
 	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f2(1, 1, 1, 0.65f);
+	glColor4f2(1, 1, 1, alpha);
 	minecraft->textures->loadAndBindTexture("gui/gui.png");
 
 	Inventory* inventory = minecraft->player->inventory;
@@ -731,10 +737,10 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 	if (_currentDropSlot >= 0 && inventory->getItem(_currentDropSlot)) {
 		int x = xBase + 3 +  _currentDropSlot * 20;
 		int color = 0x8000ff00;
-		int yy = (int)(17.0f * (_currentDropTicks + a) / DropTicks);
+		int yy = (int)(17.0f * (_currentDropTicks + partialTicks) / DropTicks);
 
 		if (_currentDropTicks >= 3) {
-			glColor4f2(0, 1, 0, 0.5f);
+			glColor4f2(0, 1, 0, alpha * 0.5f);
 		}
 		fill(x, ySlot+16-yy, x+16, ySlot+16, color);
 	}
@@ -760,14 +766,14 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 	Tesselator& t = Tesselator::instance;
 	t.beginOverride();
 
-	float x = baseItemX;
+	float xItem = baseItemX;
 	int slots = getNumSlots();
 	if (minecraft->useTouchscreen()) {
 		slots--;
 	}
 	for (int i = 0; i < slots; i++) {
-		renderSlot(i, (int)x, ySlot, a);
-		x += 20;
+		renderSlot(i, (int)xItem, ySlot, partialTicks);
+		xItem += 20;
 	}
 	_inventoryNeedsUpdate = false;
 	//_inventoryRc = t.end(_inventoryRc.vboId);
@@ -789,10 +795,10 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 	glDisable2(GL_DEPTH_TEST);
 	glDisable2(GL_TEXTURE_2D);
 	t.beginOverride();
-	x = baseItemX;
+	xItem = baseItemX;
 	for (int i = 0; i < slots; i++) {
-		ItemRenderer::renderGuiItemDecorations(minecraft->player->inventory->getItem(i), x, (float)ySlot);
-		x += 20;
+		ItemRenderer::renderGuiItemDecorations(minecraft->player->inventory->getItem(i), xItem, (float)ySlot);
+		xItem += 20;
 	}
 	t.endOverrideAndDraw();
 	glEnable(GL_DEPTH_TEST);
@@ -809,12 +815,12 @@ void Gui::renderToolBar( float a, int ySlot, const int screenWidth ) {
 
 	t.beginOverride();
 	if (minecraft->gameMode->isSurvivalType()) {
-		x = baseItemX;
+		xItem = baseItemX;
 		for (int i = 0; i < slots; i++) {
 			ItemInstance* item = minecraft->player->inventory->getItem(i);
 			if (item && item->count >= 0)
-				renderSlotText(item, k*x, k*ySlot + 1, true, true);
-			x += 20;
+				renderSlotText(item, k*xItem, k*ySlot + 1, true, true);
+			xItem += 20;
 		}
 	}
 	minecraft->textures->loadAndBindTexture("font/default8.png");

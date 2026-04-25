@@ -43,7 +43,7 @@ public:
 	void tick();
 	void render(float a, bool mouseFree, int xMouse, int yMouse);
 
-	void renderToolBar( float a, int ySlot, const int screenWidth );
+	void renderToolBar( float partialTicks, float alpha );
 
 	void renderChatMessages( const int screenHeight, unsigned int max, bool isChatting, Font* font );
 

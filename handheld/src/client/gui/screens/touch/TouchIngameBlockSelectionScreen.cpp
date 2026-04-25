@@ -213,6 +213,7 @@ void IngameBlockSelectionScreen::render( int xm, int ym, float a )
 	glEnable2(GL_BLEND);
 
 	Screen::render(xm, ym, a);
+	minecraft->gui.renderToolBar(a, 1.0f);
 	_blockList->render(xm, ym, a);
 
 	// render frame
