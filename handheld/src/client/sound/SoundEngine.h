@@ -23,11 +23,13 @@ class Options;
 
 class SoundEngine
 {
+public:
 #if defined(PLATFORM_DESKTOP)
-    static const int SOUND_DISTANCE = 24;
+    static const int SOUND_DISTANCE = 40;
 #else
-    static const int SOUND_DISTANCE = 16;
+    static const int SOUND_DISTANCE = 32;
 #endif
+private:
 
 	#if defined(ANDROID) && !defined(PRE_ANDROID23) && !defined(RPI)
 		SoundSystemSL soundSystem;

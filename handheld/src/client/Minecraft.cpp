@@ -197,7 +197,7 @@ Minecraft::Minecraft()
 	raknetInstance = new RakNetInstance();
 #endif
 #ifndef STANDALONE_SERVER
-	soundEngine = new SoundEngine(20.0f);
+	soundEngine = new SoundEngine((float)SoundEngine::SOUND_DISTANCE);
 	soundEngine->init(this, &options);
 #endif
 	//setupPieces();

@@ -71,9 +71,7 @@ void SoundSystemAL::init()
 		for(int index = 0; index < MaxNumSources; index++) {
             ALuint sourceID = _sources[index];
             
-            alSourcef(sourceID, AL_REFERENCE_DISTANCE, 6.0f);
-            alSourcef(sourceID, AL_MAX_DISTANCE, 20.0f);
-            alSourcef(sourceID, AL_ROLLOFF_FACTOR, 4.5f);
+            alSourcef(sourceID, AL_ROLLOFF_FACTOR, 0.0f);
 		}
         
 		float listenerPos[] = {0, 0, 0};

@@ -1080,7 +1080,7 @@ void LevelRenderer::renderClouds( float alpha ) {
 
 void LevelRenderer::playSound(const std::string& name, float x, float y, float z, float volume, float pitch) {
 	// @todo: deny sounds here if sound is off (rather than waiting 'til SoundEngine)
-	float dd = 16;
+	float dd = (float)SoundEngine::SOUND_DISTANCE;
 
     if (volume > 1) dd *= volume;
     if (mc->cameraTargetPlayer->distanceToSqr(x, y, z) < dd * dd) {
