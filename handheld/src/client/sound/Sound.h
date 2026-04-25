@@ -91,9 +91,15 @@ extern SoundDesc SA_wood4;
 extern SoundDesc SA_click;
 extern SoundDesc SA_explode;
 extern SoundDesc SA_splash;
+extern SoundDesc SA_break;
+extern SoundDesc SA_burp;
+extern SoundDesc SA_fire;
+extern SoundDesc SA_ignite;
 
 extern SoundDesc SA_door_open;
 extern SoundDesc SA_door_close;
+extern SoundDesc SA_chestclosed;
+extern SoundDesc SA_chestopen;
 extern SoundDesc SA_pop;
 extern SoundDesc SA_pop2;
 extern SoundDesc SA_hurt;

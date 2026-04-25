@@ -30,11 +30,17 @@
 #include "data/click.pcm"
 #include "data/explode.pcm"
 #include "data/splash.pcm"
+#include "data/break.pcm"
+#include "data/burp.pcm"
+#include "data/fire.pcm"
+#include "data/ignite.pcm"
 #include "data/pop.pcm"
 #include "data/pop2.pcm"
 #include "data/hurt.pcm"
 #include "data/door_open.pcm"
 #include "data/door_close.pcm"
+#include "data/chestclosed.pcm"
+#include "data/chestopen.pcm"
 #include "data/glass1.pcm"
 #include "data/glass2.pcm"
 #include "data/glass3.pcm"
@@ -141,9 +147,15 @@ SoundDesc SA_wood4((char*)PCM_wood4);
 SoundDesc SA_click((char*)PCM_click);
 SoundDesc SA_explode((char*)PCM_explode);
 SoundDesc SA_splash((char*)PCM_splash);
+SoundDesc SA_break((char*)PCM_break);
+SoundDesc SA_burp((char*)PCM_burp);
+SoundDesc SA_fire((char*)PCM_fire);
+SoundDesc SA_ignite((char*)PCM_ignite);
 
 SoundDesc SA_door_open((char*)PCM_door_open);
 SoundDesc SA_door_close((char*)PCM_door_close);
+SoundDesc SA_chestclosed((char*)PCM_chestclosed);
+SoundDesc SA_chestopen((char*)PCM_chestopen);
 SoundDesc SA_pop((char*)PCM_pop);
 SoundDesc SA_hurt((char*)PCM_hurt);
 SoundDesc SA_glass1((char*)PCM_glass1);
