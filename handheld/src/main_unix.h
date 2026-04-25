@@ -68,6 +68,9 @@ void platform_setMouseGrabbed(bool grab) {
 }
 
 static unsigned char transformKey(SDL_Scancode scancode, SDL_Keycode sym) {
+	if (scancode >= SDL_SCANCODE_F1 && scancode <= SDL_SCANCODE_F12)
+		return Keyboard::KEY_F1 + (scancode - SDL_SCANCODE_F1);
+
 	if (scancode >= SDL_SCANCODE_A && scancode <= SDL_SCANCODE_Z)
 		return 'a' + (scancode - SDL_SCANCODE_A);
 	if (scancode >= SDL_SCANCODE_1 && scancode <= SDL_SCANCODE_9)
@@ -242,7 +245,13 @@ int main(int argc, char** argv) {
 	g_winWidth = 848;
 	g_winHeight = 480;
 
-	g_win = SDL_CreateWindow("Minecraft PE: Pewiku, v0.6.1-dev", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+#ifdef DEBUG
+	const char* title = "Minecraft PE: Pewiku, v0.6.1-dev";
+#else
+	const char* title = "Minecraft PE: Pewiku, v0.6.1";
+#endif
+
+	g_win = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 							 g_winWidth, g_winHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 
 	if (!g_win) {
@@ -343,6 +352,7 @@ int main(int argc, char** argv) {
 		while (SDL_PollEvent(&ev)) {
 			handleSDLEvent(ev, app);
 		}
+		Multitouch::commit();
 		app->update();
 		SDL_GL_SwapWindow(g_win);
 	}

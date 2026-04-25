@@ -58,18 +58,18 @@ public:
 	static const int KEY_BACKSPACE = 8;
 	static const int KEY_RETURN = 13;
 
-	static const int KEY_F1 = 112;
-	static const int KEY_F2 = 113;
-	static const int KEY_F3 = 114;
-	static const int KEY_F4 = 115;
-	static const int KEY_F5 = 116;
-	static const int KEY_F6 = 117;
-	static const int KEY_F7 = 118;
-	static const int KEY_F8 = 119;
-	static const int KEY_F9 = 120;
-	static const int KEY_F10 = 121;
-	static const int KEY_F11 = 122;
-	static const int KEY_F12 = 123;
+	static const int KEY_F1 = 128;
+	static const int KEY_F2 = 129;
+	static const int KEY_F3 = 130;
+	static const int KEY_F4 = 131;
+	static const int KEY_F5 = 132;
+	static const int KEY_F6 = 133;
+	static const int KEY_F7 = 134;
+	static const int KEY_F8 = 135;
+	static const int KEY_F9 = 136;
+	static const int KEY_F10 = 137;
+	static const int KEY_F11 = 138;
+	static const int KEY_F12 = 139;
 
 	static const int KEY_ESCAPE = 27;
 	static const int KEY_SPACE = 32;
