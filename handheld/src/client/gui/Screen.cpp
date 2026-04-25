@@ -197,19 +197,19 @@ void Screen::keyPressed( int eventKey )
 		return;
 
 	Options& o = minecraft->options;
-	if (eventKey == o.keyMenuNext.key)
+	if (eventKey == o.keyMenuNext.key) {
 		if (++tabButtonIndex == tabButtonCount) tabButtonIndex = 0;
-	if (eventKey == o.keyMenuPrevious.key)
+		updateTabButtonSelection();
+	} else if (eventKey == o.keyMenuPrevious.key) {
 		if (--tabButtonIndex == -1) tabButtonIndex = tabButtonCount-1;
-	if (eventKey == o.keyMenuOk.key) {
+		updateTabButtonSelection();
+	} else if (eventKey == o.keyMenuOk.key) {
 		Button* button = tabButtons[tabButtonIndex];
 		if (button->active) {
 			minecraft->soundEngine->playUI("random.click", 1, 1);
 			buttonClicked(button);
 		}
 	}
-
-	updateTabButtonSelection();
 }
 
 void Screen::updateTabButtonSelection()
