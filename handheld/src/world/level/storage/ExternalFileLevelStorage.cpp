@@ -353,42 +353,6 @@ void ExternalFileLevelStorage::save(Level* level, LevelChunk* levelChunk)
 
 	chunkData.Write((const char*)levelChunk->updateMap, CHUNK_COLUMNS);
     
-    // Save Entities and TileEntities into chunk NBT (0.8.1 format)
-    CompoundTag base;
-    ListTag* entityTags = new ListTag();
-    // In 0.6.1 chunks might not have entity list easily accessible, 
-    // but LevelChunk has entityBlocks.
-    for (int i = 0; i < LevelChunk::EntityBlocksArraySize; i++) {
-        for (unsigned int j = 0; j < levelChunk->entityBlocks[i].size(); j++) {
-            Entity* e = levelChunk->entityBlocks[i][j];
-            CompoundTag* tag = new CompoundTag();
-            if (e->save(tag)) {
-                entityTags->add(tag);
-            } else {
-                delete tag;
-            }
-        }
-    }
-    base.put("Entities", entityTags);
-
-    ListTag* tileEntityTags = new ListTag();
-    const LevelChunk::TEMap& teMap = levelChunk->getTileEntityMap();
-    for (LevelChunk::TEMap::const_iterator it = teMap.begin(); it != teMap.end(); ++it) {
-        TileEntity* te = it->second;
-        if (!te->shouldSave()) continue;
-        CompoundTag* tag = new CompoundTag();
-        if (te->save(tag)) {
-            tileEntityTags->add(tag);
-        } else {
-            delete tag;
-        }
-    }
-    base.put("TileEntities", tileEntityTags);
-
-    RakDataOutput dos(chunkData);
-    NbtIo::write(&base, &dos);
-    base.deleteChildren();
-
 	regionFile->writeChunk(levelChunk->x, levelChunk->z, chunkData);
 
 	// Write entities
@@ -429,31 +393,22 @@ LevelChunk* ExternalFileLevelStorage::load(Level* level, int x, int z)
 		chunkData->Read((char*)levelChunk->blockLight.data, CHUNK_BLOCK_COUNT / 2);
 	}
 	chunkData->Read((char*)levelChunk->updateMap, CHUNK_COLUMNS);
-	if (chunkData->GetNumberOfUnreadBits() > 0) {
-		RakDataInput dis(*chunkData);
-		CompoundTag* tag = NbtIo::read(&dis);
-		if (tag) {
-            if (tag->contains("Entities", Tag::TAG_List)) {
-                ListTag* entityTags = tag->getList("Entities");
-                for (int i = 0; i < entityTags->size(); ++i) {
-                    CompoundTag* et = (CompoundTag*)entityTags->get(i);
-                    if (Entity* e = EntityFactory::loadEntity(et, level)) {
-                        levelChunk->addEntity(e);
-                    }
-                }
-            }
-            if (tag->contains("TileEntities", Tag::TAG_List)) {
-                ListTag* tileEntityTags = tag->getList("TileEntities");
-                for (int i = 0; i < tileEntityTags->size(); ++i) {
-                    CompoundTag* et = (CompoundTag*)tileEntityTags->get(i);
-                    if (TileEntity* e = TileEntity::loadStatic(et)) {
-                        levelChunk->addTileEntity(e);
-                    }
-                }
-            }
-			delete tag;
-		}
-	}
+	
+	// This will be difficult to maintain.. Storage version could be per chunk
+	// too (but probably better to just read all -> write all, so that all
+	// chunks got same version anyway)
+	//if (loadedStorageVersion >= ChunkVersion_Entity) {
+	//	int dictSize;
+	//	chunkData->Read(dictSize);
+
+	//	RakDataInput dis(*chunkData);
+	//	Tag* tmp = Tag::readNamedTag(&dis);
+	//	if (tmp && tmp->getId() == Tag::TAG_Compound) {
+	//		CompoundTag* tag = (CompoundTag*) tmp;
+
+	//		delete tmp;
+	//	}
+	//}
 
 	delete [] chunkData->GetData();
 	delete chunkData;

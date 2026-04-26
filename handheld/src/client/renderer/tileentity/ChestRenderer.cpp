@@ -20,9 +20,9 @@ void ChestRenderer::render( TileEntity* entity, float x, float y, float z, float
 			((ChestTile*)tile)->recalcLockDir(chest->level, chest->x, chest->y, chest->z);
 			data = chest->getData();
 		}
+
+		chest->checkNeighbors();
 	}
-	//TODO-PORT: Large chest rendering is incomplete, disabling early return to prevent transparent chests.
-	//if (chest->n != NULL || chest->w != NULL) return;
 
 	if (chest->e != NULL || chest->s != NULL) {
 		bindTexture("item/chest/double_normal.png");
