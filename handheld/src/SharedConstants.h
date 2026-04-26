@@ -8,14 +8,16 @@ enum LevelGeneratorVersion
 	LGV_ORIGINAL = 0,
 };
 
-namespace Common {
-	std::string getGameVersionString(const std::string& versionSuffix = "");
-}
+
 
 namespace SharedConstants
 {
-	// 0.5.0 uses NPv8
-	// 0.6.0 uses NPv9
+	const int MajorVersion = 0;
+	const int MinorVersion = 6;
+	const int PatchVersion = 3;
+	const int RevisionVersion = 0;
+	const int IsBeta = 0;
+
     const int NetworkProtocolVersion = 9;
 	const int NetworkProtocolLowestSupportedVersion = 9;
 	const int GameProtocolVersion = 1;
@@ -28,7 +30,9 @@ namespace SharedConstants
 	const int TicksPerSecond = 20;
 
 	const int GeneratorVersion = (int)LGV_ORIGINAL;
-	//int FULLBRIGHT_LIGHTVALUE = 15 << 20 | 15 << 4;
+
+	int getVersionCode();
+	int getVersionCode(int a, int b, int c, int d);
 }
 
 #endif /*NET_MINECRAFT_SharedConstants_H__*/

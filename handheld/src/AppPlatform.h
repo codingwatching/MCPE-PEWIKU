@@ -123,6 +123,7 @@ public:
 	
 	virtual bool supportsTouchscreen() { return true; }
 	
+	virtual bool supportsVibration() { return false; }
 	virtual void vibrate(int milliSeconds) {}
 
 	virtual std::string getPlatformStringVar(int stringId) {

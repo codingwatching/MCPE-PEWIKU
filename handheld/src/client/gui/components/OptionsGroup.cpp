@@ -3,6 +3,7 @@
 #include "ImageButton.h"
 #include "OptionsItem.h"
 #include "Slider.h"
+#include "TextBox.h"
 #include "../../../locale/I18n.h"
 #include "../../../world/Difficulty.h"
 OptionsGroup::OptionsGroup( std::string labelID )  {
@@ -29,12 +30,14 @@ void OptionsGroup::render( Minecraft* minecraft, int xm, int ym ) {
 }
 
 OptionsGroup& OptionsGroup::addOptionItem( const Options::Option* option, Minecraft* minecraft ) {
-	if(option->isBoolean())
-		createToggle(option, minecraft);
-	else if(option->isProgress())
-		createProgressSlider(option, minecraft);
-	else if(option->isInt())
-		createStepSlider(option, minecraft);
+	if (!minecraft->options.hideOption(option)) {
+		if(option->isBoolean())
+			createToggle(option, minecraft);
+		else if(option->isProgress())
+			createProgressSlider(option, minecraft);
+		else if(option->isInt())
+			createStepSlider(option, minecraft);
+	}
 	return *this;
 }
 
@@ -67,21 +70,20 @@ void OptionsGroup::createProgressSlider( const Options::Option* option, Minecraf
 }
 
 void OptionsGroup::createStepSlider( const Options::Option* option, Minecraft* minecraft ) {
-	std::vector<int> steps;
-	if (option == &Options::Option::DIFFICULTY) {
-		steps.push_back(Difficulty::PEACEFUL);
-		steps.push_back(Difficulty::NORMAL);
-	} else if (option == &Options::Option::GUI_SCALE) {
-		steps.push_back(0); // Auto
-		steps.push_back(1);
-		steps.push_back(2);
-		steps.push_back(4);
-		steps.push_back(8);
-	} else {
-		return;
-	}
+	std::vector<int> steps = minecraft->options.getValues(option);
+	if (steps.empty()) return;
 
 	Slider* element = new Slider(minecraft, option, steps);
+	element->width = 100;
+	element->height = 20;
+	std::string itemLabel = I18n::get(option->getCaptionId());
+	OptionsItem* item = new OptionsItem(itemLabel, element);
+	addChild(item);
+	setupPositions();
+}
+
+void OptionsGroup::createTextBox( const Options::Option* option, Minecraft* minecraft ) {
+	TextBox* element = new TextBox(minecraft, option, I18n::get(option->getCaptionId()));
 	element->width = 100;
 	element->height = 20;
 	std::string itemLabel = I18n::get(option->getCaptionId());

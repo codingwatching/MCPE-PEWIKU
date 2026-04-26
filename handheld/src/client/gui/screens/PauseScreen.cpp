@@ -43,7 +43,7 @@ PauseScreen::~PauseScreen() {
 }
 
 void PauseScreen::init() {
-	if (minecraft->useTouchscreen()) {
+	if (minecraft->useMobileUI()) {
 		bContinue = new Touch::TButton(1, "Back to game");
 		bQuit = new Touch::TButton(2, "Quit to title");
 		bQuitAndSaveLocally = new Touch::TButton(3, "Quit and copy map");

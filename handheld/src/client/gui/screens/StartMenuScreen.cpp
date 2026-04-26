@@ -5,194 +5,281 @@
 #include "OptionsScreen.h"
 #include "PauseScreen.h"
 #include "InvalidLicenseScreen.h"
-#include "PrerenderTilesScreen.h" // test button
 //#include "BuyGameScreen.h"
 
-#include "../../../util/Mth.h"
-
-#include "../Font.h"
-#include "../components/SmallButton.h"
-#include "../components/ScrolledSelectionList.h"
-
+#include "../../../SharedConstants.h"
 #include "../../Minecraft.h"
 #include "../../renderer/Tesselator.h"
-#include "../../../AppPlatform.h"
-#include "../../../LicenseCodes.h"
-#include "SimpleChooseLevelScreen.h"
 #include "../../renderer/Textures.h"
-#include "../../../SharedConstants.h"
+#include "../../../AppPlatform.h"
+#include "../components/ImageButton.h"
+#include "../../../util/Mth.h"
+#include "../../../util/Random.h"
+#include "../../../util/Common.h"
+#include "../../../locale/I18n.h"
+#include <cmath>
+int StartMenuScreen::currentSplash = -1;
 
-// Some kind of default settings, might be overridden in ::init
+static const char* gSplashes[] = {
+	"Scientific!", "Cooler than Spock!", "Collaborate and listen!", "Never dig down!",
+	"Take frequent breaks!", "Not linear!", "Han shot first!", "Nice to meet you!",
+	"Buckets of lava!", "Ride the pig!", "Larger than Earth!", "sqrt(-1) love you!",
+	"Phobos anomaly!", "Punching wood!", "Falling off cliffs!", "0% sugar!",
+	"150% hyperbole!", "Synecdoche!", "Let's danec!", "Seecret Friday update!",
+	"Ported implementation!", "Lewd with two dudes with food!", "Kiss the sky!",
+	"20 GOTO 10!", "Verlet intregration!", "Peter Griffin!", "Do not distribute!",
+	"Cogito ergo sum!", "4815162342 lines of code!", "A skeleton popped out!",
+	"The Work of Notch!", "The sum of its parts!", "BTAF used to be good!",
+	"I miss ADOM!", "umop-apisdn!", "OICU812!", "Bring me Ray Cokes!",
+	"Finger-licking!", "Thematic!", "Pneumatic!", "Sublime!", "Octagonal!",
+	"Une baguette!", "Gargamel plays it!", "Rita is the new top dog!",
+	"SWM forever!", "Representing Edsbyn!", "Matt Damon!",
+	"Supercalifragilisticexpialidocious!", "Consummate V's!", "Cow Tools!",
+	"Double buffered!", "V-synched!", "Fan fiction!", "Flaxkikare!",
+	"Jason! Jason! Jason!", "Hotter than the sun!", "Internet enabled!",
+	"Autonomous!", "Engage!", "Fantasy!", "DRR! DRR! DRR!", "Kick it root down!",
+	"Regional resources!", "Woo, facepunch!", "Woo, somethingawful!", "Woo, /v/!",
+	"Woo, tigsource!", "Woo, minecraftforum!", "Woo, worldofminecraft!",
+	"Woo, reddit!", "Woo, 2pp!", "Google anlyticsed!", "Give us Gordon!",
+	"Tip your waiter!", "Very fun!", "12345 is a bad password!",
+	"Vote for net neutrality!", "Lives in a pineapple under the sea!",
+	"Omnipotent!", "Gasp!", "...!", "Bees, bees, bees, bees!", "Haha, LOL!",
+	"Hampsterdance!", "Switches and ores!", "Menger sponge!", "idspispopd!",
+	"Eple (original edit)!", "So fresh, so clean!", "Don't look directly at the bugs!",
+	"Oh, ok, Pigmen!", "Scary!", "Play Minecraft, Watch Topgear, Get Pig!",
+	"Twittered about!", "Jump up, jump up, and get down!", "Joel is neat!",
+	"A riddle, wrapped in a mystery!", "Huge tracts of land!", "Welcome to your Doom!",
+	"Stay a while, stay forever!", "Stay a while and listen!", "Treatment for your rash!",
+	"\"Autological\" is!", "Information wants to be free!",
+	"\"Almost never\" is an interesting concept!", "Lots of truthiness!",
+	"The creeper is a spy!", "It's groundbreaking!", "Let our battle's begin!",
+	"The sky is the limit!", "Jeb has amazing hair!", "Casual gaming!",
+	"Undefeated!", "Kinda like Lemmings!", "Follow the train, CJ!",
+	"Leveraging synergy!", "DungeonQuest is unfair!", "110813!", "90210!",
+	"Tyrion would love it!", "Also try VVVVVV!", "Also try Super Meat Boy!",
+	"Also try Terraria!", "Also try Mount And Blade!", "Also try Project Zomboid!",
+	"Also try World of Goo!", "Also try Limbo!", "Also try Pixeljunk Shooter!",
+	"Also try Braid!", "That's super!", "Bread is pain!", "Read more books!",
+	"Khaaaaaaaaan!", "Less addictive than TV Tropes!", "More addictive than lemonade!",
+	"Bigger than a bread box!", "Millions of peaches!", "Fnord!",
+	"This is my true form!", "Totally forgot about Dre!", "Don't bother with the clones!",
+	"Pumpkinhead!", "Hobo humping slobo babe!", "Endless!", "Feature packed!",
+	"Boots with the fur!", "Stop, hammertime!", "Conventional!",
+	"Homeomorphic to a 3-sphere!", "Doesn't avoid double negatives!",
+	"Place ALL the blocks!", "Does barrel rolls!", "Meeting expectations!",
+	"PC gaming since 1873!", "Ghoughpteighbteau tchoghs!", "Got your nose!",
+	"Haley loves Elan!", "Afraid of the big, black bat!", "Doesn't use the U-word!",
+	"Child's play!", "See you next Friday or so!", "150 bpm for 400000 minutes!",
+	"Technologic!", "Funk soul brother!", "Pumpa kungen!", "Helo Cymru!",
+	"My life for Aiur!", "Lennart lennart = new Lennart();",
+	"I see your vocabulary has improved!", "Who put it there?",
+	"You can't explain that!", "if not ok then return end",
+	"SOPA means LOSER in Swedish!", "Big Pointy Teeth!", "Bekarton guards the gate!",
+	"Mmmph, mmph!", "Don't feed avocados to parrots!", "Swords for everyone!",
+	"Plz reply to my tweet!", ".party()!", "Take her pillow!", "Put that cookie down!",
+	"Pretty scary!", "I have a suggestion.", "Now with extra hugs!",
+	"Almost C++11!", "Woah.", "HURNERJSGER?", "What's up, Doc?",
+	"1 star! Deal with it notch!", "100% more yellow text!", "Glowing creepy eyes!",
+	"Toilet friendly!", "Annoying touch buttons!", "Astronomically accurate!",
+	"0xffff-1 chunks!", "Cubism!", "Pocket!", "Mostly harmless!", "!!!1!",
+	"Dramatic lighting!", "As seen on TV!", "Awesome!", "100% pure!",
+	"May contain nuts!", "Better than Prey!", "Less polygons!", "Sexy!",
+	"Limited edition!", "Flashing letters!", "Made by Mojang!", "It's here!",
+	"Best in class!", "It's alpha!", "100% dragon free!", "Excitement!",
+	"More than 500 sold!", "One of a kind!", "Heaps of hits on YouTube!",
+	"Indev!", "Spiders everywhere!", "Check it out!", "Holy cow, man!",
+	"It's a game!", "Made in Sweden!", "Uses C++!", "Reticulating splines!",
+	"Minecraft!", "Yaaay!", "Multiplayer!", "Touch compatible!", "Undocumented!",
+	"Ingots!", "Exploding creepers!", "That's no moon!", "l33t!", "Create!",
+	"Survive!", "Dungeon!", "Exclusive!", "The bee's knees!", "Down with O.P.P.!",
+	"Closed source!", "Classy!", "Wow!", "Not on steam!", "Oh man!",
+	"Awesome community!", "Pixels!", "Teetsuuuuoooo!", "Kaaneeeedaaaa!",
+	"Enhanced!", "90% bug free!", "Pretty!", "12 herbs and spices!", "Fat free!",
+	"Absolutely no memes!", "Free dental!", "Ask your doctor!", "Minors welcome!",
+	"Cloud computing!", "Legal in Finland!", "Hard to label!", "Technically good!",
+	"Bringing home the bacon!", "Quite Indie!", "GOTY!", "Euclidian!", "Now in 3D!",
+	"Inspirational!", "Herregud!", "Complex cellular automata!", "Yes, sir!",
+	"Played by cowboys!", "OpenGL ES 1.1!", "Thousands of colors!", "Try it!",
+	"Age of Wonders is better!", "Try the mushroom stew!", "Sensational!",
+	"Hot tamale, hot hot tamale!", "Play him off, keyboard cat!", "Guaranteed!",
+	"Macroscopic!", "Bring it on!", "Random splash!", "Call your mother!",
+	"Monster infighting!", "Loved by millions!", "Ultimate edition!", "Freaky!",
+	"You've got a brand new key!", "Water proof!", "Uninflammable!", "Whoa, dude!",
+	"All inclusive!", "Tell your friends!", "NP is not in P!", "Notch <3 ez!",
+	"Livestreamed!", "Haunted!", "Polynomial!", "Terrestrial!", "All is full of love!",
+	"Full of stars!", NULL
+};
+
 StartMenuScreen::StartMenuScreen()
-:	bHost(    2, 0, 0, 160, 24, "Play"),
-	bJoin(    3, 0, 0, 160, 24, "Play on Realms"),
-	bOptions( 4, 0, 0,  78, 22, "Options"),
-	bBuy(     5, 0, 0, 78, 22, "Buy"),
-	bTest(    999, 0, 0, 78, 22, "Create")
-{
+	: Screen()
+	, playButton(2, 0, 0, 100, 30, "")
+	, playMultiplayer(3, 0, 0, 100, 30, "")
+	, settingsButton(4, "")
+	, buyButton(5, 0, 0, 210, 24, "") {
+	copyrightString = "";
+	gameVersion = "";
+	
+	if (currentSplash == -1) {
+		int numSplashes = 0;
+		while (gSplashes[numSplashes] != NULL) numSplashes++;
+		currentSplash = Random(Common::getRawTimeS()).nextInt(numSplashes);
+	}
+	splash = gSplashes[currentSplash];
 }
 
-StartMenuScreen::~StartMenuScreen()
-{
+StartMenuScreen::~StartMenuScreen() {
 }
 
-void StartMenuScreen::init()
-{
-	buttons.push_back(&bHost);
-	buttons.push_back(&bJoin);
-	//buttons.push_back(&bTest);
+void StartMenuScreen::init() {
+	playButton.msg = "Play";
+	playMultiplayer.msg = "Multiplayer";
+	
+	ImageDef def;
+	def.name = "gui/touchgui.png";
+	def.setSrc(IntRectangle(218, 0, 22, 21));
+	def.width = 22;
+	def.height = 21;
+	settingsButton.setImageDef(def, false);
+	settingsButton.width = 32;
+	settingsButton.height = 32;
 
-	tabButtons.push_back(&bHost);
-	tabButtons.push_back(&bJoin);
+	buttons.push_back(&playButton);
+	buttons.push_back(&playMultiplayer);
+	buttons.push_back(&settingsButton);
+	buttons.push_back(&buyButton);
 
-	#ifndef PLATFORM_DESKTOP
-		buttons.push_back(&bOptions);
-		tabButtons.push_back(&bOptions);
-	#endif
+	buyButton.visible = false;
+	
+	setupPositions();
 
-	#ifdef DEMO_MODE
-		buttons.push_back(&bBuy);
-		tabButtons.push_back(&bBuy);
-	#endif
+	copyrightString = "\xffMojang AB";
+	gameVersion = Common::getGameVersionString();
 
-	copyright = "\xffMojang AB";//. Do not distribute!";
-
-	#ifdef PRE_ANDROID23
-		std::string versionString = Common::getGameVersionString("j");
-	#else
-		std::string versionString = Common::getGameVersionString();
-	#endif
-
-	#ifdef DEMO_MODE
-	#ifdef __APPLE__
-		version = versionString + " (Lite)";
-	#else
-		version = versionString + " (Demo)";
-	#endif
-	#else
-		#ifdef RPI
-			version = "v0.1.1 alpha";//(MCPE " + versionString + " compatible)";
-		#else
-			version = versionString;
-		#endif
-	#endif
-
-	#if defined(DEBUG)
-		version = version + " [DEBUG]";
-	#endif
-
-	bJoin.active = bHost.active = bOptions.active = false;
+	settingsButton.active = true;
+	settingsButton.visible = true;
+	playButton.active = true;
+	playMultiplayer.active = true;
 }
 
 void StartMenuScreen::setupPositions() {
-	int width = this->width;
-	int v3 = this->height / 2;
-	bHost.y = v3 - 3;
-	int v4 = v3 + 25;
-	v3 += 55;
-	bOptions.y = v3;
-	bBuy.y = v3;
-	bTest.y = v3;
-	bJoin.y = v4;
+	int midX = width / 2;
+	int midY = height / 2;
+	
+	playButton.width = 100;
+	playButton.height = 30;
+	playMultiplayer.width = 100;
+	playMultiplayer.height = 30;
+	
+	playButton.x = midX - 50;
+	playButton.y = midY - 15;
+	
+	playMultiplayer.x = midX - 50;
+	playMultiplayer.y = midY + 25;
 
-	bHost.x = (width - bHost.width) / 2;
-	int v7 = (width - bJoin.width) / 2;
-	bJoin.x = v7;
-	bOptions.x = v7;
-	int v8 = v7 + bOptions.width + 4;
-	bBuy.x = v8;
-	bTest.x = v8;
+	settingsButton.x = width - settingsButton.width - 2;
+	settingsButton.y = height - settingsButton.height - 2;
 
-	copyrightPosX = width - minecraft->font->width(copyright) - 1;
-	versionPosX = (width - minecraft->font->width(version)) / 2;
+	copyrightPosX = 4;
+	versionPosX = 4;
 }
 
 void StartMenuScreen::tick() {
 	_updateLicense();
 }
 
-void StartMenuScreen::buttonClicked(Button* button) {
+void StartMenuScreen::render(int xm, int ym, float a) {
+	_updateLicense();
+	renderMenuBackground(a);
+	
+	glEnable2(GL_BLEND);
+	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
+	const TextureData* td = minecraft->textures->getTemporaryTextureData(minecraft->textures->loadTexture("gui/title.png"));
+	if (td) {
+		minecraft->textures->bind(minecraft->textures->loadTexture("gui/title.png"));
+		
+		float texWidth = (float)td->w;
+		float halfScreenWidth = (float)width * 0.5f;
+		float halfRenderWidth = texWidth * 0.5f;
+		
+		if (halfScreenWidth <= halfRenderWidth) {
+			halfRenderWidth = halfScreenWidth;
+		}
+		
+		float scale = (halfRenderWidth + halfRenderWidth) / texWidth;
+		float renderHeight = (float)td->h * scale;
+		
+		glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
+		Tesselator& t = Tesselator::instance;
+		t.begin();
+		float xLeft = halfScreenWidth - halfRenderWidth;
+		float xRight = halfScreenWidth + halfRenderWidth;
+		float yTop = 4.0f;
+		float yBottom = renderHeight + 4.0f;
+		
+		t.vertexUV(xLeft, yBottom, blitOffset, 0.0f, 1.0f);
+		t.vertexUV(xRight, yBottom, blitOffset, 1.0f, 1.0f);
+		t.vertexUV(xRight, yTop, blitOffset, 1.0f, 0.0f);
+		t.vertexUV(xLeft, yTop, blitOffset, 0.0f, 0.0f);
+		t.draw();
 
-	if (button->id == bHost.id)
-	{
-        #if defined(DEMO_MODE) || defined(APPLE_DEMO_PROMOTION)
-			minecraft->setScreen( new SimpleChooseLevelScreen("_DemoLevel") );
-		#else
-			minecraft->screenChooser.setScreen(SCREEN_SELECTWORLD);
-		#endif
+		// Render Splash
+		glPushMatrix2();
+		glTranslatef2(xRight - 10, yBottom - 10, 0.0f);
+		glRotatef2(-20.0f, 0.0f, 0.0f, 1.0f);
+		
+		float splashScale = std::pow(std::sin(minecraft->guiTime * 5.0f), 4.0f) * 0.1f + 1.2f;
+		
+		glScalef2(splashScale, splashScale, splashScale);
+		drawCenteredString(minecraft->font, splash, 0, -8, 0xffffff00);
+		glPopMatrix2();
 	}
-	if (button->id == bJoin.id)
-	{
+	
+	glEnable2(GL_TEXTURE_2D);
+	drawString(minecraft->font, gameVersion, versionPosX, height - 20, 0xffffffff);
+	drawString(minecraft->font, copyrightString, copyrightPosX, height - 10, 0xffffffff);
+	
+	Screen::render(xm, ym, a);
+}
+
+void StartMenuScreen::buttonClicked(Button* button) {
+	if (button->id == playButton.id) {
+		minecraft->screenChooser.setScreen(SCREEN_SELECTWORLD);
+	} else if (button->id == playMultiplayer.id) {
 		minecraft->locateMultiplayer();
 		minecraft->screenChooser.setScreen(SCREEN_JOINGAME);
-	}
-	if (button->id == bOptions.id)
-	{
-		minecraft->setScreen(new OptionsScreen());
-	}
-	if (button->id == bTest.id)
-	{
-		//minecraft->setScreen(new PauseScreen());
-		//minecraft->setScreen(new PrerenderTilesScreen());
-	}
-	if (button->id == bBuy.id)
-	{
+	} else if (button->id == settingsButton.id) {
+		minecraft->setScreen(new OptionsScreen(0));
+	} else if (button->id == buyButton.id) {
 		minecraft->platform()->buyGame();
 		//minecraft->setScreen(new BuyGameScreen());
 	}
 }
 
-bool StartMenuScreen::isInGameScreen() { return false; }
-
-void StartMenuScreen::render( int xm, int ym, float a )
-{
-	renderBackground();
-
-#if defined(RPI)
-	TextureId id = minecraft->textures->loadTexture("gui/pi_title.png");
-#else
-	TextureId id = minecraft->textures->loadTexture("gui/title.png");
-#endif
-	const TextureData* data = minecraft->textures->getTemporaryTextureData(id);
-
-	if (data) {
-		minecraft->textures->bind(id);
-
-		const float x = (float)width / 2;
-		const float y = 4;
-		//const float scale = Mth::Min(
-		const float wh = Mth::Min((float)width/2.0f, (float)data->w / 2);
-		const float scale = 2.0f * wh / (float)data->w;
-		const float h = scale * (float)data->h;
-
-		// Render title text
-		Tesselator& t = Tesselator::instance;
-		glColor4f2(1, 1, 1, 1);
-		t.begin();
-		t.vertexUV(x-wh, y+h, blitOffset, 0, 1);
-		t.vertexUV(x+wh, y+h, blitOffset, 1, 1);
-		t.vertexUV(x+wh, y+0, blitOffset, 1, 0);
-		t.vertexUV(x-wh, y+0, blitOffset, 0, 0);
-		t.draw();
+void StartMenuScreen::_updateLicense() {
+	int licenseId = minecraft->getLicenseId();
+	bool active = false;
+	
+	if (licenseId < 0) {
+		active = false;
+	} else if (licenseId > 1) {
+		bool hasBuy = minecraft->platform()->hasBuyButtonWhenInvalidLicense();
+		minecraft->setScreen(new InvalidLicenseScreen(licenseId, hasBuy));
+		return;
+	} else {
+		active = true;
 	}
-
-#if defined(RPI)
-	if (Textures::isTextureIdValid(minecraft->textures->loadAndBindTexture("gui/logo/raknet_high_72.png")))
-		blit(0, height - 12, 0, 0, 43, 12, 256, 72+72);
-#endif
-
-	drawString(font, version, versionPosX, 62, /*50,*/ 0xffcccccc);//0x666666);
-	drawString(font, copyright, copyrightPosX, height - 10, 0xffffff);
-
-	Screen::render(xm, ym, a);
+	
+	settingsButton.active = active;
+	playButton.active = active;
+	playMultiplayer.active = active;
 }
 
-void StartMenuScreen::_updateLicense()
-{
-	bJoin.active = bHost.active = bOptions.active = true;
-}
-
-bool StartMenuScreen::handleBackEvent( bool isDown ) {
+bool StartMenuScreen::handleBackEvent(bool isDown) {
 	minecraft->quit();
 	return true;
+}
+
+bool StartMenuScreen::isInGameScreen() {
+	return false;
 }

@@ -162,8 +162,10 @@ public:
 	virtual int getScreenHeight();
 
 	virtual float getPixelsPerMillimeter();
-
+	
 	virtual bool supportsTouchscreen();
+	virtual bool supportsVibration();
+	virtual void vibrate(int milliSeconds);
 	virtual bool hasBuyButtonWhenInvalidLicense();
 
 private:

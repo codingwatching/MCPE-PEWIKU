@@ -29,6 +29,8 @@ AppPlatform_unix::AppPlatform_unix() {
 }
 
 bool AppPlatform_unix::supportsTouchscreen()  { return false; }
+bool AppPlatform_unix::supportsVibration() { return false; }
+void AppPlatform_unix::vibrate(int milliSeconds) {}
 
 TextureData AppPlatform_unix::loadTexture(const std::string& filename_, bool textureFolder) {
     TextureData out;
@@ -51,6 +53,22 @@ TextureData AppPlatform_unix::loadTexture(const std::string& filename_, bool tex
         png_read_info(pngPtr, infoPtr);
         out.w = png_get_image_width(pngPtr, infoPtr);
         out.h = png_get_image_height(pngPtr, infoPtr);
+
+        int color_type = png_get_color_type(pngPtr, infoPtr);
+        int bit_depth  = png_get_bit_depth(pngPtr, infoPtr);
+
+        if (bit_depth == 16) png_set_strip_16(pngPtr);
+        if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(pngPtr);
+        if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(pngPtr);
+        if (png_get_valid(pngPtr, infoPtr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(pngPtr);
+
+        if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE)
+            png_set_filler(pngPtr, 0xFF, PNG_FILLER_AFTER);
+
+        png_read_update_info(pngPtr, infoPtr);
+
+        out.transparent = true;
+
         png_bytep* rowPtrs = new png_bytep[out.h];
         out.data = new unsigned char[4 * out.w * out.h];
         out.memoryHandledExternally = false;

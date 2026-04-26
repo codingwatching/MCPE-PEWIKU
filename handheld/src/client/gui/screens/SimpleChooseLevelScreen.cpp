@@ -31,7 +31,7 @@ SimpleChooseLevelScreen::~SimpleChooseLevelScreen()
 
 void SimpleChooseLevelScreen::init()
 {
-	if (minecraft->useTouchscreen()) {
+	if (minecraft->useMobileUI()) {
 		bCreative = new Touch::TButton(1, "Creative mode");
 		bSurvival = new Touch::TButton(2, "Survival mode");
 		bBack	  = new Touch::TButton(3, "Back");

@@ -18,6 +18,7 @@
 #include "../../../../AppPlatform.h"
 #include "../../../../LicenseCodes.h"
 #include "../../../../util/Mth.h"
+#include "../../../../util/Common.h"
 
 #include "../DialogDefinitions.h"
 #include "../SimpleChooseLevelScreen.h"
@@ -233,7 +234,7 @@ bool StartMenuScreen::isInGameScreen() { return false; }
 
 void StartMenuScreen::render( int xm, int ym, float a )
 {
-	renderBackground();
+	renderBackground(); // renderMenuBackground(a);
     
     glEnable2(GL_BLEND);
 

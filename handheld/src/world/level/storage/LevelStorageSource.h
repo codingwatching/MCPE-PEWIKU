@@ -55,6 +55,10 @@ public:
     virtual bool isConvertible(const std::string& levelId) = 0;
     virtual bool requiresConversion(const std::string& levelId) = 0;
     virtual bool convertLevel(const std::string& levelId, ProgressListener* progress) = 0;
+	
+	virtual void storeToCache(LevelData* data, const std::string& levelId) {}
+	virtual void loadFromCache(LevelData* data, const std::string& levelId) {}
+	virtual void clearCache() {}
 };
 
 #endif /*NET_MINECRAFT_WORLD_LEVEL_STORAGE__LevelStorageSource_H__*/

@@ -24,7 +24,7 @@ public:
 	}
 
 	void init() {
-		if (minecraft->useTouchscreen()) {
+		if (minecraft->useMobileUI()) {
 			bOk  = new Touch::TButton(1, "Ok");
 			bBuy = new Touch::TButton(2, "Buy");
 		} else {

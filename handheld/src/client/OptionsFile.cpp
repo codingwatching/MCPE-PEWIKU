@@ -4,13 +4,10 @@
 #include "../util/StringUtils.h"
 
 OptionsFile::OptionsFile() {
-#ifdef __APPLE__
-	settingsPath = "./Documents/options.txt";
-#elif defined(ANDROID)
-	settingsPath = "options.txt";
-#else
-	settingsPath = "options.txt";
-#endif
+}
+
+void OptionsFile::setSettingsFolderPath(const std::string& path) {
+	settingsPath = path + "/options.txt";
 }
 
 void OptionsFile::save(const StringVector& settings) {

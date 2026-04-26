@@ -4,6 +4,8 @@
 #include "../Screen.h"
 #include "../components/Button.h"
 
+#include "../components/ImageButton.h"
+
 class StartMenuScreen: public Screen
 {
 public:
@@ -22,17 +24,19 @@ public:
 private:
 	void _updateLicense();
 
-	Button bHost;
-	Button bJoin;
-	Button bOptions;
-	Button bTest;
-	Button bBuy;
+	Button playButton;
+	Button playMultiplayer;
+	ImageButton settingsButton;
+	Button buyButton;
 
-	std::string copyright;
+	std::string copyrightString;
 	int copyrightPosX;
 
-	std::string version;
+	std::string gameVersion;
 	int versionPosX;
+
+	std::string splash;
+	static int currentSplash;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS__StartMenuScreen_H__*/

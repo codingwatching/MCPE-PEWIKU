@@ -14,4 +14,7 @@ float AppPlatform_win32::getPixelsPerMillimeter() {
 }
 
 bool AppPlatform_win32::supportsTouchscreen()  { return false; }
+bool AppPlatform_win32::supportsVibration() { return false; }
+void AppPlatform_win32::vibrate(int milliSeconds) {}
+
 bool AppPlatform_win32::hasBuyButtonWhenInvalidLicense() { return true; }

@@ -23,7 +23,7 @@ DeathScreen::~DeathScreen()
 
 void DeathScreen::init()
 {
-	if (minecraft->useTouchscreen()) {
+	if (minecraft->useMobileUI()) {
 		bRespawn = new Touch::TButton(1, "Respawn!");
 		bTitle = new Touch::TButton(2, "Main menu");
 	} else {

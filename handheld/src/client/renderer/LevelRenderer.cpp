@@ -1303,7 +1303,7 @@ void LevelRenderer::takePicture( TripodCamera* cam, Entity* entity )
 	// Push old values
 	Mob* oldCameraEntity = mc->cameraTargetPlayer;
 	bool hideGui = mc->options.hideGui;
-	bool thirdPerson = mc->options.thirdPersonView;
+	bool thirdPersonView = mc->options.thirdPersonView;
 
 	// @huge @attn: This is highly illegal, super temp!
 	mc->cameraTargetPlayer = (Mob*)cam;
@@ -1315,7 +1315,7 @@ void LevelRenderer::takePicture( TripodCamera* cam, Entity* entity )
 	// Pop values back
 	mc->cameraTargetPlayer = oldCameraEntity;
 	mc->options.hideGui = hideGui;
-	mc->options.thirdPersonView = thirdPerson;
+	mc->options.thirdPersonView = thirdPersonView;
 
 	_t_keepPic = -1;
 

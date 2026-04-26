@@ -71,6 +71,9 @@ void RenderList::renderChunks() {
 
 	for (int i = 0; i < bufferLimit; ++i) {
 		RenderChunk& rc = rlists[i];
+		if (rc.vertexCount > 0) {
+			// LOGI("Drawing chunk at %f %f %f with %d vertices\n", rc.pos.x, rc.pos.y, rc.pos.z, rc.vertexCount);
+		}
 
 		glPushMatrix2();
 		glTranslatef2(rc.pos.x, rc.pos.y, rc.pos.z);

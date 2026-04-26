@@ -21,6 +21,7 @@ protected:
 	virtual void createToggle(const Options::Option* option, Minecraft* minecraft);
 	virtual void createProgressSlider(const Options::Option* option, Minecraft* minecraft);
 	virtual void createStepSlider(const Options::Option* option, Minecraft* minecraft);
+	virtual void createTextBox(const Options::Option* option, Minecraft* minecraft);
 	std::string label;
 };
 

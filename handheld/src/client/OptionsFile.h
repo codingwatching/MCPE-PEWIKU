@@ -9,8 +9,9 @@ class OptionsFile
 {
 public:
 	OptionsFile();
-    void save(const StringVector& settings);
+	void save(const StringVector& settings);
 	StringVector getOptionStrings();
+	void setSettingsFolderPath(const std::string& path);
 	
 private:
 	std::string settingsPath;

@@ -346,7 +346,7 @@ void GameRenderer::renderLevel(float a) {
 				TIMER_POP_PUSH("select");
 				Player* player = (Player*)cameraEntity;
 				// show block outline
-				if (mc->useTouchscreen()) {
+				if (mc->useMobileUI()) {
 					levelRenderer->renderHitSelect(player, mc->hitResult, 0, NULL,
 												   a); // player.inventory->getSelected(), a);
 				} else {

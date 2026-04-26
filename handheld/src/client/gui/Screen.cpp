@@ -7,6 +7,20 @@
 #include "../../platform/input/Keyboard.h"
 #include "../../platform/input/Mouse.h"
 #include "../renderer/Textures.h"
+#include "../renderer/gles.h"
+#include "../renderer/states/DisableState.h"
+#include "../renderer/states/EnableState.h"
+#include "../../util/Mth.h"
+
+static const char* panorama_images[] = {
+	"gui/background/panorama_0.png",
+	"gui/background/panorama_1.png",
+	"gui/background/panorama_2.png",
+	"gui/background/panorama_3.png",
+	"gui/background/panorama_4.png",
+	"gui/background/panorama_5.png"
+};
+static float panoramaTimer = 0.0f;
 
 Screen::Screen()
 :   passEvents(false),
@@ -162,6 +176,78 @@ void Screen::renderDirtBackground( int vo )
 	t.vertexUV(0, 0, 0, 0, 0 + fvo);
 	t.draw();
 }
+
+void Screen::renderMenuBackground(float a)
+{
+	float time = (minecraft->guiTime * 30.0f) + a;
+	for(int i = 0; i < 6; ++i) {
+		minecraft->textures->loadTexture(panorama_images[i]);
+	}
+
+	glDisable2(GL_FOG);
+	glDisable2(GL_CULL_FACE);
+	glDisable2(GL_DEPTH_TEST);
+	glDisable2(GL_BLEND);
+
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable2(GL_TEXTURE_2D);
+	
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix2();
+	glLoadIdentity2();
+	gluPerspective(120.0f, 1.0f, 0.05f, 10.0f);
+	
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix2();
+	glLoadIdentity2();
+	glColor4f2(1.0f, 1.0f, 1.0f, 1.0f);
+	
+	glRotatef2(180.0f, 1.0f, 0.0f, 0.0f);
+	glRotatef2(Mth::sin(time / 400.0f) + 20.0f, 1.0f, 0.0f, 0.0f);
+	glRotatef2(-time * 0.1f, 0.0f, 1.0f, 0.0f);
+	
+	for (int i = 0; i < 6; ++i) {
+		glPushMatrix2();
+		if (i == 1) glRotatef2(90.0f, 0.0f, 1.0f, 0.0f);
+		if (i == 2) glRotatef2(180.0f, 0.0f, 1.0f, 0.0f);
+		if (i == 3) glRotatef2(-90.0f, 0.0f, 1.0f, 0.0f);
+		if (i == 4) glRotatef2(90.0f, 1.0f, 0.0f, 0.0f);
+		if (i == 5) glRotatef2(-90.0f, 1.0f, 0.0f, 0.0f);
+
+		minecraft->textures->loadAndBindTexture(panorama_images[i]);
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri2(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		
+		Tesselator& t = Tesselator::instance;
+		t.begin(GL_QUADS);
+		t.noColor();
+		t.vertexUV(-1.0f, -1.0f, 1.0f, 0.0f, 0.0f);
+		t.vertexUV(1.0f, -1.0f, 1.0f, 1.0f, 0.0f);
+		t.vertexUV(1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+		t.vertexUV(-1.0f, 1.0f, 1.0f, 0.0f, 1.0f);
+		t.draw();
+		
+		glPopMatrix2();
+	}
+	
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix2();
+	glMatrixMode(GL_MODELVIEW);
+	glPopMatrix2();
+
+	glEnable2(GL_CULL_FACE);
+	glEnable2(GL_DEPTH_TEST);
+
+	// Gradient overlay
+	glEnable2(GL_BLEND);
+	glBlendFunc2(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	int startColor = (0x59 << 24) | (0xFF << 16) | (0xFF << 8) | 0xFF;
+	int endColor   = (0x59 << 24) | 0;
+	fillGradient(0, 0, width, height, startColor, endColor);
+}
+
 
 bool Screen::isPauseScreen()
 {

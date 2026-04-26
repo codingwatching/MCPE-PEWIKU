@@ -9,10 +9,15 @@ public:
     static const char* Multiplayer_Username;
     static const char* Multiplayer_ServerVisible;
     
-    static const char* Graphics_Fancy;
     static const char* Graphics_LowQuality;
     static const char* Graphics_Fov;
     static const char* Graphics_GuiScale;
+    static const char* Graphics_RenderDistance;
+    static const char* Graphics_PixelsPerMilimeter;
+    static const char* Graphics_FancyGraphics;
+    static const char* Graphics_FancySkies;
+    static const char* Graphics_AnimateTextures;
+    static const char* Graphics_HideGUI;
     
     static const char* Controls_Sensitivity;
     static const char* Controls_InvertMouse;
@@ -23,6 +28,11 @@ public:
 
 	static const char* Game_DifficultyLevel;
     static const char* Game_ThirdPerson;
+
+    static const char* Last_Game_Version_Major;
+    static const char* Last_Game_Version_Minor;
+    static const char* Last_Game_Version_Patch;
+    static const char* Last_Game_Version_Beta;
 };
 
 #endif /*NET_MINECRAFT_CLIENT__OptionsStrings_H__*/

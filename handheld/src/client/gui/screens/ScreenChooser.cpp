@@ -16,7 +16,7 @@ Screen* ScreenChooser::createScreen( ScreenId id )
 {
 	Screen* screen = NULL;
 
-	if (_mc->useTouchscreen()) {
+	if (_mc->useMobileUI()) {
 		switch (id) {
 		case SCREEN_STARTMENU:	screen = new Touch::StartMenuScreen();	break;
 		case SCREEN_SELECTWORLD:screen = new Touch::SelectWorldScreen();break;
@@ -32,7 +32,7 @@ Screen* ScreenChooser::createScreen( ScreenId id )
 		}
 	} else {
 		switch (id) {
-		case SCREEN_STARTMENU:	screen = new Touch::StartMenuScreen();	break;
+		case SCREEN_STARTMENU:	screen = new StartMenuScreen();	break;
 		// screen = new StartMenuScreen();  break;
 		case SCREEN_SELECTWORLD:screen = new SelectWorldScreen();break;
 		case SCREEN_JOINGAME:	screen = new JoinGameScreen();   break;

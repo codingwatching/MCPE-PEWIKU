@@ -11,7 +11,7 @@
 #include "../network/RakNetInstance.h"
 #include "../network/ClientSideNetworkHandler.h"
 #include "../network/ServerSideNetworkHandler.h"
-//#include "../network/Packet.h"
+#include "../SharedConstants.h"
 #include "../world/entity/player/Inventory.h"
 #include "../world/level/chunk/ChunkCache.h"
 #include "../world/level/tile/Tile.h"
@@ -40,6 +40,7 @@
 #include "../util/PerfTimer.h"
 #include "../util/PerfRenderer.h"
 #include "player/input/MouseBuildInput.h"
+#include "../util/Common.h"
 
 #include "../world/Facing.h"
 
@@ -145,6 +146,8 @@ Minecraft::Minecraft()
 	lastTickTime(-1),
 	lastTime(0),
 	ticksSinceLastUpdate(0),
+	guiTime(0),
+	startTimeMs(Common::getRawTimeMs()),
 	gameMode(NULL),
 	mouseGrabbed(true),
 	missTime(0),
@@ -433,6 +436,7 @@ void Minecraft::prepareLevel(const std::string& title) {
 }
 
 void Minecraft::update() {
+	guiTime = (float)(Common::getRawTimeMs() - startTimeMs) * 0.001f;
 	//LOGI("Enter Update\n");
 
 	if (Options::debugGl)
@@ -602,6 +606,14 @@ void Minecraft::tick(int nTick, int maxTick) {
 	TIMER_POP();
 }
 
+//@port: add levels cache
+void Minecraft::onUpdatedClient(int major, int minor, int patch, int beta) {
+	int old = SharedConstants::getVersionCode(major, minor, patch, 0);
+	if (old < SharedConstants::getVersionCode(0, 8, 1, 0)) {
+		storageSource->clearCache();
+	}
+}
+
 class InputRAII {
 public:
 	~InputRAII() {
@@ -766,7 +778,7 @@ void Minecraft::tickInput() {
 				}
 
 				if (key == Keyboard::KEY_L)
-					options.viewDistance = (options.viewDistance + 1) % 4;
+					options.renderDistance = (options.renderDistance + 1) % 4;
 
 				if (key == Keyboard::KEY_U) {
 					onGraphicsReset();
@@ -1152,6 +1164,12 @@ void Minecraft::releaseMouse()
 #endif
 }
 
+bool Minecraft::useMobileUI() {
+#if defined(PLATFORM_DESKTOP)
+	return false; // @todo: false after testing
+#endif
+	return true;
+}
 bool Minecraft::useTouchscreen() {
 #if defined(DEBUG)
 	if (_forceTouchscreen) return true;
@@ -1164,8 +1182,7 @@ bool Minecraft::supportNonTouchScreen() {
 void Minecraft::init()
 {
 	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
-	options.minecraft = this;
-	options.initDefaultValues();
+	options.init(this, externalStoragePath);
 #ifndef STANDALONE_SERVER
 	checkGlError("Init enter");
 

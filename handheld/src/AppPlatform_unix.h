@@ -9,6 +9,8 @@ public:
     AppPlatform_unix();
 
     bool supportsTouchscreen() override;
+    bool supportsVibration() override;
+    void vibrate(int milliSeconds) override;
     TextureData loadTexture(const std::string& filename, bool textureFolder) override;
     BinaryBlob readAssetFile(const std::string& filename) override;
     int getScreenWidth() override;

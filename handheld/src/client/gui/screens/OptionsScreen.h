@@ -3,9 +3,14 @@
 
 #include "../Screen.h"
 #include "../components/Button.h"
+#include "../components/touch/TButton.h"
+#include "../components/touch/THeader.h"
+#include <vector>
 
 class ImageButton;
 class OptionsPane;
+class CategoryButton;
+class NinePatchLayer;
 
 class OptionsScreen: public Screen
 {
@@ -13,6 +18,7 @@ class OptionsScreen: public Screen
 	void init();
 
 	void generateOptionScreens();
+	void createCategoryButtons();
 
 public:
 	OptionsScreen(int initialCategory = 0);
@@ -29,14 +35,16 @@ public:
 private:
 	Touch::THeader* bHeader;
 	ImageButton* btnClose;
-#if defined(WIN32)
-	Button* btnUsername;
-#endif
-	std::vector<Touch::TButton*> categoryButtons;
+	
+	std::vector<CategoryButton*> categoryButtons;
 	std::vector<OptionsPane*> optionPanes;
 	OptionsPane* currentOptionPane;
 	int selectedCategory;
 	int initialCategory;
+
+	NinePatchLayer* normalBg;
+	NinePatchLayer* selectedBg;
+	Button* selectedCategoryButton;
 };
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS__OptionsScreen_H__*/

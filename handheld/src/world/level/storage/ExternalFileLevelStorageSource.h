@@ -30,6 +30,10 @@ public:
     bool isConvertible(const std::string& levelId) { return false; }
     bool requiresConversion(const std::string& levelId) { return false; }
     bool convertLevel(const std::string& levelId, ProgressListener* progress) { return false; }
+
+	void storeToCache(LevelData* data, const std::string& levelId);
+	void loadFromCache(LevelData* data, const std::string& levelId);
+	void clearCache();
 private:
 	void addLevelSummaryIfExists(LevelSummaryList& dest, const char* dirName);
 	bool hasTempDirectory() { return _hasTempDirectory; }
@@ -37,6 +41,7 @@ private:
 
 	std::string basePath;
 	std::string tmpBasePath;
+	std::string cachePath;
 	bool _hasTempDirectory;
 };
 

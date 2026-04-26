@@ -58,8 +58,9 @@ public:
 	void setSize(int width, int height);
 	void reloadOptions();
 
-	bool supportNonTouchScreen();
+	bool useMobileUI();
 	bool useTouchscreen();
+	bool supportNonTouchScreen();
 	void grabMouse();
 	void releaseMouse();
 
@@ -117,6 +118,7 @@ public:
 	bool isPowerVR() { return _powerVr; }
 	bool isKindleFire(int kindleVersion);
 	bool transformResolution(int* w, int* h);
+	void onUpdatedClient(int major, int minor, int patch, int beta);
 	void optionUpdated(const Options::Option* option, bool value);
 	void optionUpdated(const Options::Option* option, float value);
 	void optionUpdated(const Options::Option* option, int value);
@@ -180,6 +182,8 @@ public:
 #endif
 	CThread* generateLevelThread;
 	Screen* screen;
+	float guiTime;
+	long long startTimeMs;
 	static int customDebugId;
 
 	static const int CDI_NONE = 0;

@@ -50,31 +50,14 @@ public:
 };
 
 
-namespace Touch {
-class TButton: public Button
-{
-	typedef Button super;
-public:
-	TButton(int id, const std::string& msg);
-	TButton(int id, int x, int y, const std::string& msg);
-	TButton(int id, int x, int y, int w, int h, const std::string& msg);
-protected:
-	virtual void renderBg(Minecraft* minecraft, int xm, int ym);
-};
-
-// "Header" in Touchscreen mode
-class THeader: public Button {
-	typedef Button super;
-public:
-	THeader(int id, const std::string& msg);
-	THeader(int id, int x, int y, const std::string& msg);
-	THeader(int id, int x, int y, int w, int h, const std::string& msg);
-protected:
-	virtual void renderBg(Minecraft* minecraft, int xm, int ym);
-	void render( Minecraft* minecraft, int xm, int ym );
-public:
-	int xText;
-};
-}
+// @port: remove it here later
+// temporary includes - remove after gui ports are complete
+#ifndef IN_TOUCH_COMPONENT
+#include "touch/TButton.h"
+#include "touch/THeader.h"
+//
+using Touch::TButton;
+using Touch::THeader;
+#endif
 
 #endif /*NET_MINECRAFT_CLIENT_GUI_COMPONENTS__Button_H__*/

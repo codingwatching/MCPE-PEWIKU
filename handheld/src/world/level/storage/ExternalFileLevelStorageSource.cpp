@@ -41,6 +41,8 @@ ExternalFileLevelStorageSource::ExternalFileLevelStorageSource(const std::string
 	basePath = externalPath;
 	tmpBasePath = temporaryFilesPath;
 #endif
+	cachePath = tmpBasePath + "/_LevelCache";
+	createFolderIfNotExists(cachePath.c_str());
 }
 
 void ExternalFileLevelStorageSource::addLevelSummaryIfExists(LevelSummaryList& dest, const char* dirName)
@@ -187,6 +189,15 @@ bool ExternalFileLevelStorageSource::isNewLevelIdAcceptable( const std::string& 
 
 std::string ExternalFileLevelStorageSource::getFullPath(const std::string& levelId) {
     return ((TempLevelId == levelId)? tmpBasePath : basePath) + "/" + levelId;
+}
+
+void ExternalFileLevelStorageSource::storeToCache(LevelData* data, const std::string& levelId) {
+}
+
+void ExternalFileLevelStorageSource::loadFromCache(LevelData* data, const std::string& levelId) {
+}
+
+void ExternalFileLevelStorageSource::clearCache() {
 }
 
 
