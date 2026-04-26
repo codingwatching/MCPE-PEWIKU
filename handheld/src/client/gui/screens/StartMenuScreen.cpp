@@ -179,8 +179,8 @@ void StartMenuScreen::setupPositions() {
 	settingsButton.x = width - settingsButton.width - 2;
 	settingsButton.y = height - settingsButton.height - 2;
 
-	copyrightPosX = 4;
-	versionPosX = 4;
+	copyrightPosX = 2;
+	versionPosX = 2;
 }
 
 void StartMenuScreen::tick() {

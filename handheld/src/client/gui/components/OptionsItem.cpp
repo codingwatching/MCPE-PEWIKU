@@ -36,6 +36,6 @@ void OptionsItem::render( Minecraft* minecraft, int xm, int ym ) {
 			displayLabel = ss.str();
 		}
 	}
-	minecraft->font->draw(displayLabel, (float)x, (float)y + yOffset, 0x909090, false);
+	minecraft->font->draw(displayLabel, (float)x, (float)y + yOffset, 0xffffffff, true);
 	super::render(minecraft, xm, ym);
 }

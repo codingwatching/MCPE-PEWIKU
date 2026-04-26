@@ -137,7 +137,11 @@ void OptionsScreen::render(int xm, int ym, float a) {
 		renderBackground();
 	} else {
 		renderMenuBackground(a);
+		renderBackground();
 	}
+	
+	fill(0, 0, 38, height, 0xff958782);
+	
 	super::render(xm, ym, a);
 	
 	int xmm = xm * width / minecraft->width;
