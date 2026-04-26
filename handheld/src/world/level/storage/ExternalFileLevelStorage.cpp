@@ -450,46 +450,36 @@ LevelChunk* ExternalFileLevelStorage::load(Level* level, int x, int z)
 	levelChunk->terrainPopulated = true;
 	levelChunk->createdFromSave = true;
 
-	return levelChunk;
+		return levelChunk;
 }
 
 void ExternalFileLevelStorage::saveEntities( Level* level, LevelChunk* levelChunk )
 {
 	lastSavedEntitiesTick = tickCount;
-	int count = 0;
-	float st = getTimeS();
-
-	// Version 1: Save ALL Entities for all chunks in one structure
-	EntityList& entities = level->entities;
 
 	ListTag* entityTags = new ListTag();
-	for (unsigned int i = 0; i < entities.size(); ++i) {
-		Entity* e = entities[i];
+	for (unsigned int i = 0; i < level->entities.size(); ++i) {
+		Entity* e = level->entities[i];
 
 		CompoundTag* tag = new CompoundTag();
 		if (e->save(tag)) {
-			count++;
 			entityTags->add(tag);
-		} else
+		} else {
 			delete tag;
+		}
 	}
 
-	// Version 1: Save ALL TileEntities for all chunks in one structure
-	TileEntityList& tileEntities = level->tileEntities;
-	//TileEntityList keep, dontKeep;
-	//partitionTileEntities
-
 	ListTag* tileEntityTags = new ListTag();
-	for (unsigned int i = 0; i < tileEntities.size(); ++i) {
-		TileEntity* e = tileEntities[i];
+	for (unsigned int i = 0; i < level->tileEntities.size(); ++i) {
+		TileEntity* e = level->tileEntities[i];
 		if (!e->shouldSave()) continue;
 
 		CompoundTag* tag = new CompoundTag();
 		if (e->save(tag)) {
-			count++;
 			tileEntityTags->add(tag);
-		} else
+		} else {
 			delete tag;
+		}
 	}
 
 	CompoundTag base;
@@ -498,7 +488,7 @@ void ExternalFileLevelStorage::saveEntities( Level* level, LevelChunk* levelChun
 
 	RakNet::BitStream stream;
 	RakDataOutput dos(stream);
-	NbtIo::write(&base, &dos);
+	Tag::writeNamedTag(&base, &dos);
 	int numBytes = stream.GetNumberOfBytesUsed();
 
 	FILE* fp = fopen((levelPath + "/entities.dat").c_str(), "wb");
@@ -510,11 +500,7 @@ void ExternalFileLevelStorage::saveEntities( Level* level, LevelChunk* levelChun
 		fwrite(stream.GetData(), 1, numBytes, fp);
 		fclose(fp);
 	}
-
 	base.deleteChildren();
-
-	float tt = getTimeS() - st;
-	LOGI("Time to save %d entities: %f s. Size: %d bytes\n", count, tt, numBytes);
 }
 
 void ExternalFileLevelStorage::loadEntities(Level* level, LevelChunk* chunk) {

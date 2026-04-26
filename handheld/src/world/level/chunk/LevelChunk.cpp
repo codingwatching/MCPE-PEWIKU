@@ -444,21 +444,48 @@ bool LevelChunk::isSkyLit( int x, int y, int z )
 
 void LevelChunk::load()
 {
-	/*        level->tileEntityList.addAll(tileEntities.values());
-	for (int i = 0; i < entityBlocks.length; i++) {
-	level->addEntities(entityBlocks[i]);
+	// add entities and tile-entities to the level global list
+
+	loaded = true;
+	
+	// tile-entities
+	for (TEMap::iterator it = tileEntities.begin(); it != tileEntities.end(); ++it) {
+		TileEntity* te = it->second;
+		std::vector<TileEntity*>::iterator vit = std::find(level->tileEntities.begin(), level->tileEntities.end(), te);
+		if (vit == level->tileEntities.end()) {
+			level->tileEntities.push_back(te);
+		}
 	}
-	*/
+
+	// entities
+	for (int i = 0; i < EntityBlocksArraySize; i++) {
+		for (unsigned int j = 0; j < entityBlocks[i].size(); j++) {
+			level->addEntity(entityBlocks[i][j]);
+		}
+	}
 }
 
 void LevelChunk::unload()
 {
+	// remove entities and tile-entities from the level global list
+	
 	loaded = false;
-    /*        level->tileEntityList.removeAll(tileEntities.values());
-	for (int i = 0; i < entityBlocks.length; i++) {
-	level->removeEntities(entityBlocks[i]);
+	
+	// tile-entities
+	for (TEMap::iterator it = tileEntities.begin(); it != tileEntities.end(); ++it) {
+		TileEntity* te = it->second;
+		std::vector<TileEntity*>::iterator vit = std::find(level->tileEntities.begin(), level->tileEntities.end(), te);
+		if (vit != level->tileEntities.end()) {
+			level->tileEntities.erase(vit);
+		}
 	}
-	*/
+
+	// entities
+	for (int i = 0; i < EntityBlocksArraySize; i++) {
+		for (unsigned int j = 0; j < entityBlocks[i].size(); j++) {
+			level->removeEntity(entityBlocks[i][j]);
+		}
+	}
 }
 
 void LevelChunk::markUnsaved()
