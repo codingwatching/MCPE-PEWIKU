@@ -267,6 +267,7 @@ int main(int argc, char** argv) {
 	}
 
 	SDL_GL_MakeCurrent(g_win, g_glContext);
+	// SDL_GL_SetSwapInterval(0); // VSync OFF
 
 #ifdef PLATFORM_DESKTOP
 	SDL_ShowCursor(SDL_ENABLE);
