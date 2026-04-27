@@ -25,7 +25,7 @@ void OptionsGroup::setupPositions() {
 }
 
 void OptionsGroup::render( Minecraft* minecraft, int xm, int ym ) {
-	minecraft->font->draw(label, (float)x + 2, (float)y, 0xffffffff, true);
+	minecraft->font->draw(label, (float)x + 2, (float)y, 0xffffffff);
 	super::render(minecraft, xm, ym);
 }
 

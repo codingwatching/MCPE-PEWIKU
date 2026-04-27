@@ -248,6 +248,10 @@ void Screen::renderMenuBackground(float a)
 	fillGradient(0, 0, width, height, startColor, endColor);
 }
 
+bool Screen::renderGameBehind(){
+	return true; // minecraft->options.fancyGraphics;
+}
+
 
 bool Screen::isPauseScreen()
 {
@@ -350,9 +354,6 @@ void Screen::mouseReleased( int x, int y, int buttonNum )
 	clickedButton = NULL;
 }
 
-bool Screen::renderGameBehind() {
-	return true;
-}
 
 bool Screen::hasClippingArea( IntRectangle& out )
 {

@@ -134,10 +134,9 @@ void OptionsScreen::setupPositions() {
 
 void OptionsScreen::render(int xm, int ym, float a) {
 	if (minecraft->isLevelGenerated()) {
-		renderBackground();
-	} else {
 		renderMenuBackground(a);
-		renderBackground();
+	} else {
+		renderBackground(0);
 	}
 	
 	fill(0, 0, 38, height, 0xff958782);

@@ -14,7 +14,6 @@ add_subdirectory("${PROJECT_DIR}/lib_projects/raknet/jni" "${CMAKE_CURRENT_BINAR
 add_definitions(-DSTANDALONE_SERVER)
 
 set(CompileFiles
-    ${SRC_DIR}/main.cpp
     ${SRC_DIR}/main_dedicated.cpp
     ${SRC_DIR}/platform/input/Controller.cpp
     ${SRC_DIR}/platform/input/Keyboard.cpp
@@ -51,6 +50,7 @@ set(CompileFiles
     ${SRC_DIR}/util/Mth.cpp
     ${SRC_DIR}/util/StringUtils.cpp
     ${SRC_DIR}/util/PerfTimer.cpp
+    ${SRC_DIR}/util/Common.cpp
     ${SRC_DIR}/world/Direction.cpp
     ${SRC_DIR}/world/entity/AgableMob.cpp
     ${SRC_DIR}/world/entity/Entity.cpp
@@ -162,6 +162,6 @@ set(CompileFiles
     ${SRC_DIR}/world/phys/HitResult.cpp
 )
 
-message(${CMAKE_LIBRARY_ARCHITECTURE})
+message(STATUS "Library Architecture: ${CMAKE_LIBRARY_ARCHITECTURE}")
 add_executable(pewiku_server ${CompileFiles})
 target_link_libraries(pewiku_server raknet ${CMAKE_THREAD_LIBS_INIT})

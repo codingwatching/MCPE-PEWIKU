@@ -126,6 +126,7 @@ void NinecraftApp::teardown()
 	TileEntity::teardownTileEntities();
 	// Note: Don't tear down statics if we run on Android
 	// (we might change this in the future)
+#ifndef STANDALONE_SERVER
 #ifdef DEBUG
 	ItemRenderer::teardown_static();
 #endif
@@ -134,6 +135,7 @@ void NinecraftApp::teardown()
 		EntityTileRenderer::instance = NULL;
 	}
 	TileEntityRenderDispatcher::destroy();
+#endif
 }
 
 void NinecraftApp::update()
